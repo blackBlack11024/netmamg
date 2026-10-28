@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>5G 核心網路期中複習</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* 單一暗色主題：深灰藍底，訊號青做主色，琥珀做「還不熟」 */
+  --bg:#0f1318;
+  --surface:#171d24;
+  --raise:#1f2731;
+  --line:#2b3542;
+  --text:#e4e8ee;
+  --muted:#93a0b0;
+  --accent:#5cc8d6;
+  --accent-ink:#0c2328;
+  --warn:#e6b450;
+  --good:#78c48a;
+  --bad:#e57a6e;
+  --display:"IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --body:"Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+  /* 版面：上方固定導覽列，下方一次只放一張卡 */
+  color-scheme: dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:var(--body);font-size:17px;line-height:1.7}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h1,h2,h3{text-wrap:balance;line-height:1.35;margin:0}
+.mono{font-family:var(--display)}
+
+header{position:sticky;top:0;z-index:20;background:rgba(15,19,24,.94);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+.bar{max-width:880px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.brand{font-family:var(--display);font-weight:600;font-size:15px;letter-spacing:.02em;color:var(--accent);margin-right:auto}
+nav{display:flex;gap:4px;flex-wrap:wrap}
+nav button{background:none;border:1px solid transparent;border-radius:8px;padding:6px 12px;color:var(--muted);font-size:15px}
+nav button[aria-current="true"]{color:var(--text);background:var(--raise);border-color:var(--line)}
+.timer{display:flex;align-items:center;gap:8px;font-family:var(--display);font-size:14px;color:var(--muted)}
+.timer button{background:var(--raise);border:1px solid var(--line);border-radius:8px;padding:4px 10px;font-size:13px}
+.tbar{height:3px;background:var(--line)}
+.tbar i{display:block;height:100%;width:0;background:var(--accent);transition:width 1s linear}
+
+main{max-width:880px;margin:0 auto;padding:22px 16px 80px}
+.view{display:none}
+.view.on{display:block}
+
+.lead{color:var(--muted);margin:6px 0 18px;max-width:62ch}
+.notice{border-left:3px solid var(--warn);background:var(--surface);padding:10px 14px;border-radius:0 8px 8px 0;color:var(--text);font-size:15px;margin:12px 0}
+
+/* home */
+.units{display:grid;gap:10px;margin:18px 0}
+.unit{display:grid;grid-template-columns:110px 1fr auto;gap:14px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.unit .tag{font-family:var(--display);font-size:14px;color:var(--accent)}
+.unit .nm{font-size:15px}
+.meter{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin-top:6px}
+.meter i{display:block;height:100%;background:var(--good)}
+.unit .num{font-family:var(--display);font-size:13px;color:var(--muted);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.quick{display:flex;gap:10px;flex-wrap:wrap;margin:6px 0 22px}
+.btn{background:var(--raise);border:1px solid var(--line);border-radius:10px;padding:10px 16px;font-size:15px}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:700}
+.btn.warn{border-color:var(--warn);color:var(--warn)}
+.steps{counter-reset:s;display:grid;gap:8px;padding:0;margin:10px 0 0;list-style:none}
+.steps li{counter-increment:s;display:flex;gap:12px;align-items:baseline;color:var(--muted);font-size:15px}
+.steps li::before{content:counter(s);font-family:var(--display);color:var(--accent);min-width:1.2em}
+.steps b{color:var(--text);font-weight:500}
+h2.sec{font-size:15px;font-family:var(--display);color:var(--muted);font-weight:500;letter-spacing:.04em;margin:26px 0 8px}
+
+/* filters */
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.chip{background:none;border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:14px;color:var(--muted)}
+.chip[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
+.chip.sep{margin-left:8px}
+
+/* card */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px 22px 18px}
+.meta{display:flex;gap:10px;align-items:center;font-family:var(--display);font-size:13px;color:var(--muted);margin-bottom:10px;flex-wrap:wrap}
+.meta .u{color:var(--accent)}
+.meta .st{margin-left:auto;padding:1px 8px;border-radius:999px;border:1px solid var(--line)}
+.meta .st.good{color:var(--good);border-color:var(--good)}
+.meta .st.warn{color:var(--warn);border-color:var(--warn)}
+.q{font-size:20px;font-weight:700;margin:0 0 4px;max-width:60ch}
+.qz{color:var(--muted);font-size:16px;margin:0}
+.reveal{margin-top:20px}
+.keyline{border:1px solid var(--accent);background:rgba(92,200,214,.07);border-radius:10px;padding:12px 14px;font-size:17px}
+.keyline small{display:block;font-family:var(--display);font-size:12px;color:var(--accent);letter-spacing:.06em;margin-bottom:2px}
+.pts{margin:14px 0 0;padding-left:1.1em;display:grid;gap:4px;max-width:66ch}
+.pts li::marker{color:var(--accent)}
+.plain{margin-top:14px;padding:10px 14px;background:var(--raise);border-radius:10px;font-size:15px;color:var(--text)}
+.plain small{font-family:var(--display);font-size:12px;color:var(--warn);letter-spacing:.06em;display:block}
+.chk{color:var(--warn);font-size:13px;margin-top:10px}
+.figwrap{margin-top:14px;overflow-x:auto;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px}
+.figwrap svg{display:block;min-width:620px;width:100%;height:auto}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;align-items:center}
+.actions .sp{margin-left:auto;font-family:var(--display);font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+kbd{font-family:var(--display);font-size:11px;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 5px;margin-left:6px;color:var(--muted)}
+.btn.primary kbd{color:var(--accent-ink);border-color:var(--accent-ink)}
+.hint{font-size:13px;color:var(--muted);margin-top:10px}
+
+.t{border-bottom:1px dashed var(--accent);cursor:help;color:inherit}
+.t:hover{color:var(--accent)}
+
+.lsec{margin:26px 0 8px;font-size:18px}
+.lsub{font-family:var(--display);font-size:13px;color:var(--muted);letter-spacing:.04em;margin:16px 0 8px}
+.li{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:16px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:8px}
+.li .n{font-family:var(--display);color:var(--accent);margin-right:8px}
+.li .qq{font-weight:500}
+.li .qz{font-size:14px;color:var(--muted);margin-top:2px}
+.li .pg{font-family:var(--display);font-size:12px;color:var(--muted)}
+.li .ans{font-size:15px;border-left:2px solid var(--accent);padding-left:12px}
+.li .ans .k{font-weight:700}
+.li .ans ul{margin:6px 0 0;padding-left:1.1em;color:var(--muted)}
+.li .ans .w{color:var(--warn);font-size:13px}
+.li .ol{margin:6px 0 0;padding:0;list-style:none;display:grid;gap:2px;color:var(--muted)}
+.li .ol .r{color:var(--good);font-weight:500}
+.li .ol .r::before{content:"✓ ";}
+.hide .li .ans{filter:blur(7px);cursor:pointer;user-select:none}
+.hide .li.open .ans{filter:none;cursor:auto;user-select:auto}
+@media (max-width:700px){.li{grid-template-columns:1fr}}
+/* mcq */
+.opts{display:grid;gap:8px;margin-top:16px}
+.opt{display:flex;gap:12px;align-items:flex-start;text-align:left;background:var(--raise);border:1px solid var(--line);border-radius:10px;padding:11px 14px;font-size:16px;width:100%}
+.opt .k{font-family:var(--display);color:var(--muted);min-width:1.2em}
+.opt.right{border-color:var(--good);background:rgba(120,196,138,.1)}
+.opt.wrong{border-color:var(--bad);background:rgba(229,122,110,.1)}
+.opt[disabled]{cursor:default}
+.why{margin-top:14px;padding:12px 14px;border-radius:10px;background:var(--raise);font-size:15px}
+.why b{font-family:var(--display);font-weight:600}
+.score{font-family:var(--display);font-size:14px;color:var(--muted);margin-bottom:12px;display:flex;gap:16px;flex-wrap:wrap}
+.score b{color:var(--text)}
+
+/* glossary */
+.search{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 14px;color:var(--text);font:inherit;margin-bottom:14px}
+.gl{display:grid;gap:8px}
+.gi{display:grid;grid-template-columns:150px 1fr;gap:14px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
+.gi .ab{font-family:var(--display);color:var(--accent);font-weight:600;word-break:break-word}
+.gi .fn{font-size:13px;color:var(--muted)}
+.gi .zh{font-weight:500}
+.gi .pl{font-size:15px}
+
+/* diagrams view */
+.fig{margin-bottom:26px}
+.fig h3{font-size:17px;margin-bottom:4px}
+.fig p{color:var(--muted);font-size:15px;margin:0 0 8px;max-width:64ch}
+table.opt-t{border-collapse:collapse;width:100%;min-width:560px;font-size:14px}
+.opt-t th,.opt-t td{border-bottom:1px solid var(--line);padding:7px 10px;text-align:left}
+.opt-t th{font-family:var(--display);font-weight:500;color:var(--muted);font-size:12px}
+.opt-t td:first-child{font-family:var(--display);color:var(--accent)}
+
+/* popover */
+.pop{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);width:min(560px,calc(100% - 24px));background:var(--raise);border:1px solid var(--accent);border-radius:12px;padding:14px 16px;z-index:50;box-shadow:0 10px 30px rgba(0,0,0,.5);display:none}
+.pop.on{display:block}
+.pop .ab{font-family:var(--display);color:var(--accent);font-weight:600;font-size:17px}
+.pop .fn{font-size:13px;color:var(--muted)}
+.pop .zh{margin-top:2px;font-weight:500}
+.pop .pl{margin-top:6px;font-size:15px}
+.pop button{position:absolute;right:10px;top:8px;background:none;border:0;color:var(--muted);font-size:14px}
+
+.tip{position:absolute;z-index:70;max-width:340px;background:var(--raise);border:1px solid var(--accent);border-radius:10px;padding:10px 12px;box-shadow:0 8px 24px rgba(0,0,0,.5);pointer-events:none;display:none;font-size:14px;line-height:1.55}
+.tip.on{display:block}
+.tip .ab{font-family:var(--display);color:var(--accent);font-weight:600}
+.tip .fn{font-size:12px;color:var(--muted)}
+.tip .pl{margin-top:4px}
+.tip::after{content:"";position:absolute;left:var(--ax,20px);bottom:-6px;width:10px;height:10px;background:var(--raise);border-right:1px solid var(--accent);border-bottom:1px solid var(--accent);transform:rotate(45deg)}
+.tip.below::after{bottom:auto;top:-6px;transform:rotate(225deg)}
+.toast{position:fixed;top:64px;left:50%;transform:translateX(-50%);background:var(--accent);color:var(--accent-ink);padding:8px 16px;border-radius:999px;font-weight:700;font-size:14px;z-index:60;display:none}
+.toast.on{display:block}
+
+.done{text-align:center;padding:30px 10px}
+.done h3{font-size:20px;margin-bottom:6px}
+.done p{color:var(--muted)}
+
+svg text{font-family:var(--body)}
+svg .lbl{font-family:var(--display);font-size:12px;fill:var(--accent)}
+
+@media (max-width:560px){
+  html,body{font-size:16px}
+  .unit{grid-template-columns:1fr auto}
+  .unit .tag{grid-column:1/-1}
+  .gi{grid-template-columns:1fr;gap:2px}
+  .card{padding:18px 16px}
+  .q{font-size:18px}
+  .timer .lab{display:none}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <div class="brand">5G CORE ／ 期中複習</div>
+    <nav id="nav">
+      <button data-v="home" aria-current="true">開始</button>
+      <button data-v="list">題目總表</button>
+      <button data-v="cards">問答卡</button>
+      <button data-v="mcq">選擇題</button>
+      <button data-v="figs">圖解</button>
+      <button data-v="terms">名詞</button>
+    </nav>
+    <div class="timer"><span class="lab">專注</span><span id="tleft">15:00</span><button id="tbtn" type="button">開始 15 分鐘</button></div>
+  </div>
+  <div class="tbar"><i id="tfill"></i></div>
+</header>
+
+<main>
+  <!-- HOME -->
+  <section class="view on" id="v-home">
+    <h1 style="font-size:24px">今天一次讀一小塊就好</h1>
+    <p class="lead">題目都來自你的樣卷。每張卡先給「一句話答案」，背這句就能拿大部分分數；下面的條列是補充，白話版幫你理解。看到底下有虛線的英文縮寫，點它就會跳出解釋。</p>
+    <div class="quick">
+      <button class="btn primary" id="go5" type="button">5 張卡快速衝刺</button>
+      <button class="btn warn" id="goWeak" type="button">只練還不熟的</button>
+      <button class="btn" id="goMcq" type="button">做 10 題選擇題</button>
+    </div>
+
+    <h2 class="sec">各章進度</h2>
+    <div class="units" id="units"></div>
+
+    <h2 class="sec">建議讀法</h2>
+    <ol class="steps">
+      <li><span><b>先看「圖解」的 SBA 架構圖</b>，大概 5 分鐘。後面很多題都在問這張圖。</span></li>
+      <li><span><b>問答卡一次 5 張</b>，看完按「我會了」或「還不熟」。</span></li>
+      <li><span><b>做選擇題</b>，樣卷的選擇題幾乎都是「哪一個是錯的」，錯的選項通常是把兩個功能互換。</span></li>
+      <li><span><b>回頭只練還不熟的</b>，直到全部變綠。</span></li>
+    </ol>
+    <div class="notice" id="f-note"></div>
+    <p class="hint">進度存在這個瀏覽器裡。<button class="chip" id="reset" type="button">清除進度</button></p>
+  </section>
+
+  <!-- LIST -->
+  <section class="view" id="v-list">
+    <h1 style="font-size:22px">樣卷題目總表</h1>
+    <p class="lead">example1 的每一題照順序排好，右邊或下方是對照答案。想自我測驗就把答案遮起來，點一題才打開那一題。</p>
+    <div class="chips" id="listChips"></div>
+    <div id="listBox"></div>
+  </section>
+
+  <!-- CARDS -->
+  <section class="view" id="v-cards">
+    <div class="chips" id="cardChips"></div>
+    <div id="cardBox"></div>
+  </section>
+
+  <!-- MCQ -->
+  <section class="view" id="v-mcq">
+    <div class="chips" id="mcqChips"></div>
+    <div class="score" id="mcqScore"></div>
+    <div id="mcqBox"></div>
+  </section>
+
+  <!-- FIGURES -->
+  <section class="view" id="v-figs">
+    <div class="fig">
+      <h3>5G SBA 架構（樣卷第 8 題要畫的就是這張）</h3>
+      <p>上半部是控制面，大家掛在同一條服務匯流排上互相呼叫 API。下半部是資料真正走的路。實線是使用者資料，虛線是控制信令。</p>
+      <div class="figwrap" data-fig="sba"></div>
+    </div>
+    <div class="fig">
+      <h3>SBI 的兩種互動方式</h3>
+      <p>Consumer 是來要服務的 NF，Producer 是提供服務的 NF。</p>
+      <div class="figwrap" data-fig="sbi"></div>
+    </div>
+    <div class="fig">
+      <h3>NSA Option 3 / 3a / 3x</h3>
+      <p>三種都是 4G eNB 當主、接 4G 核心網 EPC。差別只在使用者資料在哪裡分流（琥珀色圓點）。</p>
+      <div class="figwrap" data-fig="nsa"></div>
+    </div>
+    <div class="fig">
+      <h3>TR38.801 架構選項一覽</h3>
+      <p>看兩件事：接哪個核心網、誰當主基地台。</p>
+      <div class="figwrap" data-fig="opt"></div>
+    </div>
+    <div class="fig">
+      <h3>漫遊：Local Breakout 和 Home Routed</h3>
+      <p>差別在資料從哪個國家的網路出去。</p>
+      <div class="figwrap" data-fig="roam"></div>
+    </div>
+    <div class="fig">
+      <h3>常考介面速查</h3>
+      <p>選擇題很愛把兩個介面互換，這張表看熟。</p>
+      <div class="figwrap" data-fig="ifs"></div>
+    </div>
+  </section>
+
+  <!-- TERMS -->
+  <section class="view" id="v-terms">
+    <label for="q" class="hint" style="display:block;margin:0 0 6px">搜尋縮寫、英文或中文</label>
+    <input id="q" class="search" type="search" placeholder="例如 AMF、切片、漫遊" autocomplete="off">
+    <div class="gl" id="gl"></div>
+  </section>
+</main>
+
+<div class="pop" id="pop" role="dialog" aria-live="polite"><button type="button" id="popx">關閉</button><div id="popc"></div></div>
+<div class="toast" id="toast"></div>
+<div class="tip" id="tip" role="tooltip"></div>
+
+<script>
+const UNITS = [
+  {id:'f', name:'free5GC 核心網路', short:'free5GC', note:'已依提供的 free5GC PDF 文字與投影片圖表校對；圖中數值、架構連線與介面標示也納入答案。若 PDF 沒有提供明確內容，會標示講義未提供。'},
+  {id:'a1', name:'A-1 次世代核心網路', short:'A-1'},
+  {id:'a2', name:'A-2 SBA 架構與網路功能', short:'A-2'},
+  {id:'a3', name:'A-3 控制平面與使用者平面', short:'A-3'},
+  {id:'c1', name:'C-1 接取系統整合（延伸）', short:'C-1', note:'樣卷沒有出這章的題目，但它在考試範圍內。'},
+  {id:'c3', name:'C-3 網路切片（延伸）', short:'C-3', note:'樣卷沒有出這章的題目，但它在考試範圍內。'}
+];
+
+/* ---------- 問答卡（樣卷簡答題） ---------- */
+const CARDS = [
+ {id:'f1',u:'f',p:'P.35',q:'List two 4G candidate systems being commercially deployed.',zh:'列出兩個已商轉的 4G 候選系統。',
+  key:'Mobile WiMAX 和第一版 LTE（Long Term Evolution）',
+  pts:['Mobile WiMAX：投影片指出 2007 年首先在韓國使用。','第一版 LTE：投影片指出 2009 年起在挪威奧斯陸及瑞典斯德哥爾摩使用。','依 PDF 第 35 頁作答；此處應寫 LTE，不是 LTE-Advanced。'],
+  plain:'PDF 列出的兩個已商用 4G 候選系統是 Mobile WiMAX 與 first-release LTE。'},
+ {id:'f2',u:'f',p:'P.38',q:'List 3 advances of 4G as compared with 3G.',zh:'4G 比 3G 進步的 3 個地方。',
+  key:'封包交換核心網、扁平化架構、控制平面與使用者平面分離',
+  pts:['核心網只採封包交換（packet-switched only）。','架構簡化、扁平化（simplified / flat architecture）。','控制平面（Control Plane）與使用者平面（User Plane）分離。','其他投影片列出的特點：E-UTRAN 內移動時封包經 S-GW 路由；可與 3GPP、可信任／不可信任 non-3GPP 及固定接取網路漫遊。'],
+  plain:'依 PDF 第 38 頁，前三項可作為「列出三個進步」的答案。'},
+ {id:'f3',u:'f',p:'P.53',q:'What are 2 features of 5G as compared with 4G?',zh:'5G 比 4G 多了哪 2 個特色？',
+  key:'資料速率更高、端到端延遲更低，並支援大量機器連線。',
+  pts:['PDF 第 64 頁的 NGMN 5G vision：資料速率 1–10 Gbps。','端到端延遲目標為 1–10 ms。','使用情境還包括高移動性、超可靠通訊及大量機器型通訊。','注意：PDF 第 53 頁只是 Outline，不能當作數值答案來源。'],
+  plain:'可用「更快、更低延遲、支援更多機器」概括 5G 相較 4G 的特色。'},
+ {id:'f4',u:'f',p:'P.55（圖表）',chk:1,q:'What is the 5G e2e latency and air latency, respectively?',zh:'5G 的端到端延遲和空中介面延遲各是多少？',
+  key:'E2E latency < 5 ms；Air latency < 1 ms。',
+  pts:['投影片第 55 頁圖表上方明確標示：E2E Latency < 5 ms。','同一張圖表下方明確標示：Air Latency < 1 ms。','圖中同時以長條比較 4G：E2E 約 50 ms、Air 約 10 ms；5G 約為其十分之一。','注意：這題要依第 55 頁圖表作答，不是第 64 頁 NGMN vision 的 1–10 ms。'],
+  plain:'看圖記：5G 端到端小於 5 ms，空中介面小於 1 ms；兩者都是圖上標示的目標值。'},
+ {id:'f5',u:'f',p:'P.64',q:'What are the following values for NGMN 5G vision? (a) data rate (b) user mobility?',zh:'NGMN 5G 願景中的 (a) 資料速率 (b) 使用者移動速度。',
+  key:'(a) 1–10 Gbps (b) >500 km/h',
+  pts:['資料速率：1–10 Gbps。','使用者移動速度：高於 500 km/h。','PDF 第 62 頁是 NGMN 5G Requirements 比較表；題目問 NGMN 5G vision，對應第 64 頁。'],
+  plain:'這題請對照 PDF 第 64 頁的 NGMN 5G vision。'},
+ {id:'f6',u:'f',p:'P.87',q:'Describe the architecture of Non-Standalone Type 3/3a.',zh:'描述 NSA Option 3 / 3a 的架構。',
+  key:'eNB 是主基地台並連接 4G 核心網 EPC，gNB 作為次基地台。Option 3 的 gNB 使用者面經 eNB；Option 3a 的 gNB 另以 S1-U 直接連到 EPC。',
+  pts:['又叫 EN-DC：手機同時連 eNB 和 gNB（雙連線）','控制信令（S1-C）只走 eNB，gNB 不碰控制','Option 3：資料先進 eNB，再經圖中標示的 Xx 介面分流到 gNB','Option 3a：eNB 與 gNB 都有 S1-U 連到 EPC，gNB 的使用者資料可直接進核心網','補充 Option 3x：資料先進 gNB，由 gNB 分流'],
+  dia:'nsa', plain:'NSA 像在舊房子（4G）加裝新冷氣（5G），但電箱（控制）還是用舊的。'},
+ {id:'f7',u:'f',p:'P.89',q:'What is SBA in 5G?',zh:'5G 的 SBA 是什麼？',
+  key:'Service-Based Architecture：控制面每個網路功能（NF）都把能力包成「服務」，彼此用統一的 API（HTTP/2）呼叫',
+  pts:['每個 NF 可以提供服務（producer），也可以使用別人的服務（consumer）','NF 啟動時向 NRF 註冊，要找別人時向 NRF 查（discovery）','介面命名：N + NF 名，例如 Namf、Nsmf','好處：模組化、可重用、方便虛擬化與擴充'],
+  dia:'sba', plain:'像公司各部門都開好網頁 API，要什麼就呼叫，不用每兩個部門各拉一條專線。'},
+ {id:'f8',u:'f',p:'P.90-92',q:'Draw the 5G SBA architecture with UE, gNB, UPF, DN, AMF, SMF, AUSF, PCF, NSSF, NRF and interfaces N1, 2, 3, 4, 6, 9.',zh:'畫出 5G SBA 架構圖並標出 N1、N2、N3、N4、N6、N9。',
+  key:'控制面 NF 透過 SBI 提供服務；使用者面為 UE → gNB → UPF → DN，若有多個 UPF，UPF 之間可經 N9 連接。',
+  pts:['N1：UE ↔ AMF（NAS 信令；圖中第 92 頁）。','N2：gNB ↔ AMF（控制面）。','N3：gNB ↔ UPF（使用者面資料）。','N4：SMF ↔ UPF（SMF 控制 UPF）。','N6：UPF ↔ DN（資料網路）。','N9：UPF ↔ UPF（見第 90 頁架構圖）。'],
+  dia:'sba', plain:'口訣：1 手機找大腦、2 基地台找大腦、3 基地台送資料、4 SMF 管 UPF、6 出門上網、9 UPF 互傳。'},
+ {id:'f9',u:'f',p:'P.100',q:'List two types of SBI in 5G and draw the process procedures.',zh:'列出兩種 SBI 互動方式並畫出流程。',
+  key:'Request–Response 和 Subscribe–Notify',
+  pts:['Request–Response：Consumer 送請求，Producer 回應，一來一回結束','Subscribe–Notify：Consumer 先訂閱，Producer 之後有事件時主動通知'],
+  dia:'sbi', plain:'Request–Response 像打電話問問題；Subscribe–Notify 像訂閱頻道，有新片才通知你。'},
+ {id:'f10',u:'f',p:'P.104',q:'List 3 key 5G use cases.',zh:'列出 5G 三大使用情境。',
+  key:'eMBB、URLLC、mMTC',
+  pts:['eMBB（增強型行動寬頻）：4K/8K 影片、VR、高速上網','URLLC（超可靠低延遲）：自駕車、遠端手術、工廠控制','mMTC（大量機器通訊）：智慧電表、感測器、物聯網'],
+  plain:'三種客人：要速度的、要反應快的、數量超多的。'},
+ {id:'f11',u:'f',p:'P.109',q:'What is the entity to support Non-3GPP Access in 5G?',zh:'5G 中支援 non-3GPP 接取的網路實體是什麼？',
+  key:'N3IWF（Non-3GPP InterWorking Function）',
+  pts:['N3IWF：給「不可信任」的 non-3GPP 接取用，例如一般 Wi-Fi','UE 和 N3IWF 之間建 IPsec 隧道','N3IWF 用 N2 接 AMF、N3 接 UPF，看起來就像一台基地台','補充：可信任的用 TNGF，有線的用 W-AGF'],
+  plain:'N3IWF 像一個海關，讓從 Wi-Fi 進來的手機也能用 5G 核心網。'},
+ {id:'f12',u:'f',p:'',q:'List 2 popular open sources 5G core network and 1 popular RAN emulator.',zh:'列出 2 個開源 5G 核心網和 1 個 RAN 模擬器。',
+  key:'這份 PDF 沒有列出「兩個開源 5G 核心網＋一個 RAN 模擬器」的完整名單，因此無法只依此 PDF 確認原答案。',
+  pts:['PDF 第 125 頁提供 free5GC 官方網站。','PDF 第 136 頁列出 free5GC 的測試設備：商用 4G eNB、商用手機，以及 Stage 2/3 使用的 5G SA gNB 與 UE。','PDF 第 137 頁提到 Spirent Landslide，可模擬 5G SA UE 與 gNB；它是測試／模擬工具，不等同於 PDF 明確列出的開源 RAN 模擬器名單。','Open5GS、UERANSIM、OAI、srsRAN 這些名稱並未在本 PDF 相關頁面中列為答案。'],
+  plain:'若考試要求答案必須來自這份 PDF，建議將此題標記為「講義未提供完整答案」，不要把外部知識混成講義內容。'},
+
+ {id:'a1_1',u:'a1',p:'P.30',q:'What are 3 types of EPC geographical areas?',zh:'EPC 的 3 種地理區域。',
+  key:'Tracking Area、MME Pool Area、S-GW Service Area',
+  pts:['Tracking Area（追蹤區）：最小、互不重疊，用來追蹤手機大概在哪','MME Pool Area：手機在這區內移動，不用換 MME（可能涵蓋一整個大城市）','S-GW Service Area：手機在這區內移動，不用換 S-GW'],
+  plain:'由小到大：TA 像「里」、MME Pool 像「市」，在同一個市裡管你的大腦不用換人。'},
+ {id:'a1_2',u:'a1',p:'P.32',q:'What are the 3GPP Release versions for 5G?',zh:'5G 對應哪些 3GPP Release？',
+  key:'Release 15 ～ 18（R18 起稱 5G-Advanced，R19 也是 5G-Advanced）',
+  pts:['R15（2018）：第一個 5G NR 版本','R16（2020）：5G Phase 2','R17（2022）：再加強','R18（2023/2024）：5G-Advanced 開始'],
+  plain:'記「15 開始」就好：R15 是 5G 的 1.0 版。'},
+ {id:'a1_3',u:'a1',p:'P.35',q:'In ITU-R IMT-2020, define (a) Uplink peak data rate, (b) User experienced downlink data rate, (c) Mobility, (d) Connection density.',zh:'IMT-2020 的四個數值。',
+  key:'(a) 10 Gbps (b) 100 Mbps (c) 500 km/h (d) 10⁶ 個/km²',
+  pts:['上行峰值 10 Gbps（下行峰值是 20 Gbps）','用戶體驗下行 100 Mbps（上行 50 Mbps）','移動性 500 km/h（eMBB / URLLC）','連線密度每平方公里 100 萬個裝置（mMTC）','延遲：eMBB 4 ms、URLLC 1 ms'],
+  plain:'數字口訣：上 10 下 20（峰值），體驗 100 / 50，跑 500，一百萬台。'},
+ {id:'a1_4',u:'a1',p:'P.47',q:'List 4 features of 5G System Architecture.',zh:'5G 系統架構的 4 個特色。',
+  key:'SBA、共用核心網、網路切片、應用支援（新 QoS 模型）',
+  pts:['Service Based Architecture：元件定義成網路功能，模組化、可重用','Common Core Network：一個核心網可接各種接取網路','Network Slicing：用同一套實體網路切出多個邏輯網路','Application Support：新的 QoS 模型，滿足不同應用需求'],
+  plain:'四個字頭：服務化、共用、切片、應用。'},
+ {id:'a1_5',u:'a1',p:'P.60',q:'6G vision: (a) peak data rates (b) radio latency (c) connectivity density (d) reliability (e) power on battery.',zh:'6G 願景的五個數值。',
+  key:'(a) >1 Tbps (b) <1 µs (c) 10⁷ 個/km² (d) 99.99999% (e) 電池 50 年',
+  pts:['大容量：峰值 >1 Tbps，需要時隨時 1 Gbps','低延遲：無線延遲 <1 微秒','大連結：每平方公里 1000 萬個裝置','高可靠：99.99999%（7 個 9）','低功耗：電池用 50 年'],
+  plain:'6G 數字都是 5G 再往上跳：T 級速度、微秒延遲、千萬連線、七個九、五十年。'},
+ {id:'a1_6',u:'a1',p:'P.71',q:'Describe the 5G Architecture Options in TR38.801.',zh:'描述 TR38.801 的 5G 架構選項。',
+  key:'看兩件事：核心網是 EPC 還是 5GC，主基地台是 4G 還是 5G',
+  pts:['Option 1：LTE eNB + EPC（純 4G）','Option 2：gNB + 5GC（純 5G，SA）','Option 3/3a：EN-DC，LTE 當主、接 EPC，gNB 當副','Option 4/4a：NE-DC，gNB 當主、接 5GC，eLTE 當副','Option 5：eLTE eNB 接 5GC','Option 7/7a：NGEN-DC，eLTE 當主、接 5GC，gNB 當副','有 a：副基地台的使用者面直接接核心網；沒 a：經主基地台'],
+  dia:'opt', plain:'奇數 3、5、7 是 4G 基地台當家；2、4 是 5G 基地台當家。'},
+ {id:'a1_7',u:'a1',p:'P.81',q:'Define LEO, MEO, GEO, HEO and HAPs in NTN and their altitudes.',zh:'NTN 中 LEO、MEO、GEO、HEO、HAPs 的定義與高度。',
+  key:'HAPs 8–50 km、LEO 500–2,000 km、MEO 8,000–20,000 km、GEO 35,786 km、HEO 橢圓軌道',
+  pts:['HAPs / UAS：高空平台（飛機、氣球），8–50 km','LEO 低軌：500–2,000 km，延遲低，但要很多顆衛星','MEO 中軌：8,000–20,000 km','GEO 同步軌道：赤道上方 35,786 km，看起來不動','HEO：高橢圓軌道，不是圓的'],
+  plain:'越高越少顆就能蓋住地球，但訊號跑越久。Starlink 就是 LEO。'},
+ {id:'a1_8',u:'a1',p:'P.88',q:'List 6 usage scenarios defined in IMT-2030.',zh:'IMT-2030（6G）的 6 個使用情境。',
+  key:'沿用 3 個升級版 ＋ 新增 3 個',
+  pts:['eMBB → Immersive Communication（沉浸式通訊）','mMTC → Massive Communication（大量通訊）','URLLC → HRLLC（超高可靠低延遲）','新增：Ubiquitous Connectivity（無所不在連線）','新增：AI and Communication','新增：Integrated Sensing and Communication（通訊感知整合）'],
+  plain:'舊三個換新名字，再加上「到處都連得到」「AI」「感測」。'},
+ {id:'a1_9',u:'a1',p:'P.88',q:'List 4 design principles applicable to all usage scenarios in IMT-2030.',zh:'IMT-2030 適用所有情境的 4 個設計原則。',
+  key:'Sustainability、Connecting the unconnected、Ubiquitous intelligence、Security / resilience',
+  pts:['永續（省能源）','連結尚未連網的人','無所不在的智慧','安全與韌性'],
+  plain:'就是那張輪狀圖最外圈的四段字。'},
+
+ {id:'a2_1',u:'a2',p:'P.14-18',q:'Define the relationship in 5G architectures: Roaming / Non-roaming, local breakout / home routed, Trusted / Untrusted non-3GPP.',zh:'說明漫遊／非漫遊、LBO／Home routed、可信任／不可信任 non-3GPP 的關係。',
+  key:'先分「有沒有漫遊」；有漫遊再分「資料在哪出去」；接取方式另外分「可不可信任」',
+  pts:['Non-roaming：手機在自家電信（HPLMN）','Roaming：手機在別家（VPLMN），又分兩種：','　LBO：資料在拜訪網就近出去','　Home routed：資料經 N9 繞回本籍網才出去','Non-3GPP 接取：Untrusted 走 N3IWF、Trusted 走 TNGF（兩者都能搭配漫遊或不漫遊）'],
+  dia:'roam', plain:'出國用手機：LBO 是在當地直接上網；Home routed 是先繞回台灣再上網。'},
+ {id:'a2_2',u:'a2',p:'P.14-18',q:'Explain the difference between roaming local breakout and home routed scenarios.',zh:'漫遊時 LBO 和 Home routed 的差別。',
+  key:'LBO：SMF、UPF 都在拜訪網，資料就近出去。Home routed：拜訪網只有 V-SMF / V-UPF，資料經 N9 回到本籍網的 H-UPF 才出去。',
+  pts:['LBO：延遲短；拜訪網的 vPCF 經 N24 向本籍網 hPCF 拿政策','Home routed：多了 H-SMF，V-SMF 和 H-SMF 用 N16 溝通','Home routed：本籍電信能完整掌控計費和政策，但路比較遠','兩國之間的控制信令都經過 SEPP（N32）'],
+  dia:'roam', plain:'LBO 是在日本用日本的網路出去；Home routed 是資料先飛回台灣再出去。'},
+ {id:'a2_3',u:'a2',p:'P.29',q:'List 3 types of non-3GPP access networks defined in 5G.',zh:'5G 定義的 3 種 non-3GPP 接取網路。',
+  key:'Untrusted non-3GPP、Trusted non-3GPP、Wireline access',
+  pts:['Untrusted：例如咖啡店 Wi-Fi，經 N3IWF','Trusted：電信商信任的 Wi-Fi（TNAN），經 TNGF','Wireline：有線網路（例如家用光纖），經 W-AGF'],
+  plain:'non-3GPP = 不是行動通訊標準的網路，最常見是 Wi-Fi。'},
+ {id:'a2_4',u:'a2',p:'P.44-45',q:'List 3 features of ATSSS.',zh:'ATSSS 的 3 個功能。',
+  key:'MPTCP、MPQUIC、ATSSS-LL（另有 PMF 量測）',
+  pts:['ATSSS = Access Traffic Steering, Switching, Splitting：同時用 5G 和 Wi-Fi，決定流量怎麼導、怎麼切換、怎麼分','MPTCP functionality：用多路徑 TCP 分流','MPQUIC functionality：用多路徑 QUIC 分流','ATSSS-LL functionality：低層分流，Ethernet 型 MA PDU Session 需要它','PMF：量測兩條路的效能（延遲、丟包）'],
+  plain:'手機同時開 5G 和 Wi-Fi，ATSSS 決定哪些資料走哪條路。'},
+ {id:'a2_5',u:'a2',p:'P.67',q:'List 2 5GS TSN translator functionalities.',zh:'5GS 的 2 種 TSN 轉換器功能。',
+  key:'DS-TT（裝置端）和 NW-TT（網路端）',
+  pts:['DS-TT：Device-side TSN translator，在手機那一側','NW-TT：Network-side TSN translator，在 UPF 那一側','控制面的翻譯由 TSN AF 負責','可選功能：hold and forward（消除抖動）'],
+  plain:'整個 5G 系統假裝成一台 TSN 交換器，兩端的翻譯員就是 DS-TT 和 NW-TT。'},
+ {id:'a2_6',u:'a2',p:'P.67',q:'List 3 TSN configuration models defined in IEEE Std 802.1Q.',zh:'IEEE 802.1Q 的 3 種 TSN 設定模型。',
+  key:'Fully centralized、Fully distributed、Centralized network / distributed user',
+  pts:['Fully centralized：這一版 5GS 有支援','Fully distributed：不支援','Centralized network / distributed user：不支援'],
+  plain:'只要記「5G 只支援全集中式」。'},
+
+ {id:'a3_1',u:'a3',p:'P.4',q:'The network functions within 5G System provide 3 supports on control plane.',zh:'5G 控制面提供哪 3 種保護機制？',
+  key:'負載（重新）平衡、過載控制、NAS 層壅塞控制',
+  pts:['Load (re-)balancing：把手機平均分給不同 AMF','Overload control：NF 撐不住時限制進來的量','NAS level congestion control：叫手機等一下再來（back-off timer）'],
+  plain:'像餐廳：分配客人到各桌、客滿時限制入場、叫客人過一段時間再來。'},
+ {id:'a3_2',u:'a3',p:'P.34',q:'List 3 trigger mechanisms used for UPF reporting to the SMF.',zh:'UPF 向 SMF 回報用量的 3 種觸發方式。',
+  key:'定期回報、達到門檻回報、SMF 要求時回報',
+  pts:['Periodic reporting：每隔 SMF 設定的時間回報一次','Usage thresholds：用量到 SMF 給的門檻就回報','Report on demand：SMF 主動問時回報'],
+  plain:'像電費：每月固定抄表、用到警戒值通知、你打電話問也會告訴你。'},
+
+ {id:'c1_1',u:'c1',p:'P.5-8',q:'（延伸）Release 15–18 各自的重點？',zh:'',
+  key:'R15 第一版 5G NR、R16 工業與 V2X、R17 RedCap 與衛星、R18 5G-Advanced',
+  pts:['R15：NR，支援 NSA 和 SA；eMBB、URLLC、mMTC','R16：MIMO 強化、DSS、IIoT/URLLC、非授權頻段（NR-U）、V2X、定位、IAB','R17：RedCap、NR 擴到 71 GHz、MBS 廣播多播、NTN 衛星','R18：5G-Advanced，節能、覆蓋、移動性、MIMO、AI/ML'],
+  plain:'一年多一版，每版補新用途。'},
+ {id:'c1_2',u:'c1',p:'P.56-59',q:'（延伸）5QI 是什麼？和 LTE 的 QCI 差在哪？',zh:'',
+  key:'5QI = 5G QoS Identifier，等於 LTE 的 QCI，但選項更多，還多了 Delay Critical GBR',
+  pts:['三種資源類型：GBR、Non-GBR、Delay Critical GBR（新的）','5QI 1：通話語音，延遲預算 100 ms','5QI 5：IMS 信令','5QI 82–90：Delay Critical GBR，延遲 5–30 ms，用在自動化、V2X'],
+  plain:'5QI 是一個號碼，代表「這種流量要多快、可以掉多少封包」。'},
+ {id:'c1_3',u:'c1',p:'P.64-71',q:'（延伸）RTP 和 RTCP 的分工？',zh:'',
+  key:'RTP 傳影音資料；RTCP 回報品質（QoS 回饋）並同步',
+  pts:['RTP 通常跑在 UDP 上（TCP 重傳太慢）','RTP 標頭有序號（找遺失、排順序）、時間戳（同步）、SSRC（辨識來源）','RTP 用偶數埠號，RTCP 用下一個奇數埠號','RTCP 頻寬很小'],
+  plain:'RTP 是送貨卡車，RTCP 是司機回報路況。'},
+ {id:'c1_4',u:'c1',p:'P.72-76',q:'（延伸）H.323 有哪些元件？',zh:'',
+  key:'Endpoint（終端）、Gateway（閘道）、Gatekeeper（守門員）、MCU（多點控制）',
+  pts:['Gateway：接不同網路（例如 H.323 ↔ ISDN），轉碼','Gatekeeper：網路中心，管定址、頻寬、驗證','MCU：三方以上視訊會議，混合畫面','H.225、H.245 走 TCP；RAS、RTP 走 UDP'],
+  plain:'H.323 是老牌視訊會議標準。'},
+ {id:'c1_5',u:'c1',p:'P.80-82',q:'（延伸）QoE 是什麼？怎麼量？',zh:'',
+  key:'QoE 是使用者主觀感受；常用 MOS（平均意見分數）來量',
+  pts:['QoS 是網路指標（延遲、丟包），QoE 是人覺得好不好用','MOS：請人評分後取平均','MOS 只能量特定媒體、受控環境，有局限'],
+  plain:'QoS 是體檢數字，QoE 是你自己覺得舒不舒服。'},
+
+ {id:'c3_1',u:'c3',p:'P.8-11',q:'（延伸）什麼是網路切片？',zh:'',
+  key:'把一套實體網路切成多個邏輯網路，每片有自己的資源和特性，而且要端到端（RAN、傳輸網、核心網）一起切',
+  pts:['每片可依服務等級協定（SLA）動態調整','E2E：RAN、TN（傳輸網）、CN（核心網）都要分配資源','挑戰：資源管理、移動預測、安全、端到端編排'],
+  plain:'一條高速公路畫出公車專用道、貨車道、一般車道。'},
+ {id:'c3_2',u:'c3',p:'P.12-15',q:'（延伸）S-NSSAI 的格式？',zh:'',
+  key:'SST（8 bits）＋ SD（24 bits）',
+  pts:['SST：切片／服務類型，例如 eMBB、URLLC、mIoT','SD：切片區分器，同類型裡再細分','一支 UE 可以有多個 S-NSSAI'],
+  plain:'SST 是「哪一類」，SD 是「同一類裡的第幾號」。'},
+ {id:'c3_3',u:'c3',p:'P.22',q:'（延伸）哪些核心網功能是所有切片共用的？',zh:'',
+  key:'UDM 和 NSSF 所有切片共用；NRF、PCF 可共用也可專屬',
+  pts:['UDM：用戶資料，大家都要查','NSSF：負責選切片，本身不能被切','NRF、PCF：可以通用，也可以每片一個'],
+  plain:'選切片的人不能自己在某一片裡面。'},
+ {id:'c3_4',u:'c3',p:'P.23-33',q:'（延伸）網路切片的要求有哪些？',zh:'',
+  key:'互不影響、可設最小／最大容量、可設優先順序、UE 能同時用多片',
+  pts:['一片的流量和建立、刪除不能影響其他片','營運商可定義最小可用容量、最大容量','多片搶資源時可定優先順序','UE 可同時被指派到多個切片','可限制切片只能在特定地理區域使用'],
+  plain:'就是「隔離」加「可控」。'}
+];
+
+/* ---------- 選擇題 ---------- */
+const MCQ = [
+ {id:'m_f1',u:'f',p:'P.4',q:'關於 1G 行動網路，哪一個是錯的？',o:['用類比訊號傳語音','代表系統有 AMPS、NMT、TACS','多工方式是 FDMA','已經可以傳簡訊（SMS）'],a:3,w:'SMS 是 2G（GSM）才有的。1G 只有類比語音。'},
+ {id:'m_f2',u:'f',p:'P.7-10',q:'關於 2G，哪一個是錯的？',o:['改用數位語音','GSM 使用 TDMA','IS-95 使用 CDMA','GSM 一開始就是全 IP 分封交換'],a:3,w:'GSM 是電路交換。後來 GPRS（2.5G）才加上分封交換，全 IP 要到 4G。'},
+ {id:'m_f3',u:'f',p:'P.12-16',q:'關於 3G，哪一個是錯的？',o:['UMTS 使用 WCDMA','CDMA2000 是 3GPP2 的 3G','3G 屬於 ITU 的 IMT-2000','3G 核心網只有分封交換，沒有電路交換'],a:3,w:'3G 核心網同時有電路交換（語音）和分封交換（數據）。只剩分封交換是 4G。'},
+ {id:'m_f4',u:'f',p:'P.17',q:'關於 Release 99，哪一個是錯的？',o:['第一個 UMTS 版本','引入 WCDMA 無線接取（UTRAN）','核心網沿用 GSM/GPRS 的電路＋分封','R99 首次定義 LTE'],a:3,w:'LTE 是 Release 8。'},
+ {id:'m_f5',u:'f',p:'P.18-19',q:'關於 Release 4～8，哪一個是錯的？',o:['R5 引入 IMS 和 HSDPA','R6 引入 HSUPA','R8 引入 LTE 和 EPC','R4 就已定義 5G NR'],a:3,w:'5G NR 是 Release 15。R4 主要是把核心網的控制和承載分開（MSC Server + MGW）。'},
+ {id:'m_f6',u:'f',p:'P.37',q:'關於 3GPP Release 8 架構，哪一個是錯的？',o:['E-UTRAN 只有 eNB，沒有 RNC','MME 負責控制面','S-GW、P-GW 負責使用者資料','EPC 保留電路交換域來傳語音'],a:3,w:'EPC 只有分封交換，語音要用 VoLTE（或退回 3G/2G 的 CSFB）。'},
+ {id:'m_f7',u:'f',p:'P.40-45',q:'關於 4G EPS，哪一個是錯的？',o:['EPS = E-UTRAN + EPC','是扁平的全 IP 架構','控制面和使用者面分開','HSS 負責把封包轉送到外部網路'],a:3,w:'HSS 是用戶資料庫。把封包送到外部網路的是 P-GW。'},
+ {id:'m_f8',u:'f',p:'P.51',q:'類比／數位、電路／分封交換，哪一個是錯的？',o:['1G：類比、電路交換','2G：數位、電路交換','3G：數位，電路與分封都有','4G：數位，電路與分封都有'],a:3,w:'4G 只有分封交換（全 IP）。'},
+ {id:'m_f9',u:'f',p:'P.75-77',q:'關於 Release 8～14，哪一個是錯的？',o:['R10 是 LTE-Advanced，引入載波聚合','R13 是 LTE-Advanced Pro，加入 NB-IoT','R14 加入 LTE V2X','R12 首次定義 5G NR'],a:3,w:'5G NR 從 R15 開始。'},
+ {id:'m_f10',u:'f',p:'P.85-89',q:'關於 Release 15～18，哪一個是錯的？',o:['R15 是第一個 5G NR 版本','R17 加入 RedCap 和 NTN','R18 開始稱為 5G-Advanced','R16 是第一個 5G NR 版本'],a:3,w:'第一個是 R15（NSA 2017/12、SA 2018/6）。'},
+ {id:'m_f11',u:'f',p:'P.93-97',q:'關於 AMF，哪一個是錯的？',o:['終結 N1（NAS）和 N2','負責註冊與移動管理','和 AUSF 合作做接取驗證','負責分配 UE 的 IP 位址'],a:3,w:'分配 IP 是 SMF 的工作。AMF 管「你在哪、能不能進來」。'},
+ {id:'m_f12',u:'f',p:'P.93-97',q:'關於 SMF，哪一個是錯的？',o:['建立、修改、釋放 PDU Session','分配 UE IP 位址','選擇並經 N4 控制 UPF','自己轉送使用者資料封包'],a:3,w:'轉送資料是 UPF 的工作。SMF 只下指令。'},
+ {id:'m_f13',u:'f',p:'P.93-97',q:'關於 NRF，哪一個是錯的？',o:['讓 NF 註冊自己的資料（NF profile）','提供 NF 探索（discovery）','可核發存取授權（OAuth2 token）','負責驗證使用者身分'],a:3,w:'驗證使用者是 AUSF。NRF 是「NF 的通訊錄」。'},
+ {id:'m_f14',u:'f',p:'P.109',q:'5G 中支援 non-3GPP 接取的實體是？',o:['N3IWF','NRF','NSSF','NEF'],a:0,w:'N3IWF 處理不可信任的 non-3GPP（例如一般 Wi-Fi）接取。'},
+ {id:'m_f15',u:'f',p:'P.110',q:'哪一個「不是」Release 16 支援的？',o:['IIoT 與 URLLC 強化','非授權頻段 NR-U','V2X（NR 版）','RedCap（降規裝置）'],a:3,w:'RedCap 是 Release 17。'},
+ {id:'m_f16',u:'f',p:'P.111',q:'哪一個「不是」Release 16 支援的？',o:['IAB（整合接取與回傳）','定位服務','NR 擴展到 71 GHz','UE 省電'],a:2,w:'71 GHz 是 Release 17。'},
+
+ {id:'m_a1_1',u:'a1',p:'P.5',q:'關於 5G 標準，哪一個是錯的？',o:['5G 屬於 3GPP 家族，包含 5G NR','5G 對應 ITU 的 IMT-2020','NB-IoT、LTE-M 也被列在 5G 家族','5G 對應 ITU 的 IMT-Advanced'],a:3,w:'IMT-Advanced 是 4G，5G 是 IMT-2020。'},
+ {id:'m_a1_2',u:'a1',p:'P.47',q:'哪一個「不是」5G 系統架構的特色？',o:['Service Based Architecture','Common Core Network','Network Slicing','每種接取網路各配一套核心網'],a:3,w:'5G 是「共用核心網」，一個核心網接各種接取網路。'},
+ {id:'m_a1_3',u:'a1',p:'P.85',q:'NTN 和地面網路比，哪一個是錯的？',o:['LEO、MEO 衛星高速移動，cell 也跟著移動','都卜勒頻移比較大、變化多','傳播延遲變化快，需要更強的 beam 管理','GEO 衛星相對地面移動最快、都卜勒最嚴重'],a:3,w:'GEO 和地球同步，看起來幾乎不動，最像地面網路。'},
+ {id:'m_a1_4',u:'a1',p:'P.30',q:'關於 EPC 地理區域，哪一個是錯的？',o:['Tracking Area 用來追蹤手機位置','MME Pool Area 內移動不用換 MME','S-GW Service Area 內移動不用換 S-GW','Tracking Area 是最大的區域，而且彼此重疊'],a:3,w:'Tracking Area 是較小、不重疊的單位。'},
+ {id:'m_a1_5',u:'a1',p:'P.35',q:'IMT-2020 的下行峰值速率是？',o:['1 Gbps','10 Gbps','20 Gbps','100 Mbps'],a:2,w:'下行 20、上行 10。100 Mbps 是用戶體驗下行。'},
+ {id:'m_a1_6',u:'a1',p:'P.35',q:'IMT-2020 中 URLLC 的延遲要求是？',o:['1 ms','4 ms','10 ms','20 ms'],a:0,w:'URLLC 1 ms，eMBB 4 ms。'},
+ {id:'m_a1_7',u:'a1',p:'P.74',q:'NSA Option 3 家族中，在 S-GW 分流的是？',o:['Option 3','Option 3a','Option 3x','Option 2'],a:1,w:'3 在 eNB 分流、3a 在 S-GW、3x 在 gNB。'},
+ {id:'m_a1_8',u:'a1',p:'P.83',q:'關於衛星的 payload，哪一個正確？',o:['Transparent 模式衛星上有基地台功能','Regenerative 模式只做放大和變頻','Transparent（bent-pipe）就像類比中繼器','兩種模式都不能做頻率轉換'],a:2,w:'Transparent 只轉頻、濾波、放大，像中繼器；Regenerative 衛星上有基地台功能。'},
+ {id:'m_a1_9',u:'a1',p:'P.39',q:'關於 3GPP，哪一個是錯的？',o:['1998 年 12 月成立','由 7 個區域標準組織組成','最初目標是根據 GSM 發展 3G','是聯合國的專門機構'],a:3,w:'聯合國專門機構是 ITU。3GPP 是標準組織的合作夥伴計畫。'},
+
+ {id:'m_a2_1',u:'a2',p:'P.29-32',q:'關於 5G 支援 non-3GPP 接取，哪一個是錯的？',o:['不可信任的經 N3IWF 接入','可信任的經 TNGF 接入','UE 要和 N3IWF / TNGF 建立 IPsec 隧道','同時經 3GPP 和 non-3GPP 連到同一個 PLMN 時，會由兩個不同 AMF 服務'],a:3,w:'連到同一個 PLMN 時由「單一 AMF」服務。只有連到不同 PLMN 才會有兩個 AMF。'},
+ {id:'m_a2_2',u:'a2',p:'P.23',q:'N4 介面在哪兩者之間？',o:['AMF 和 SMF','SMF 和 UPF','gNB 和 UPF','UPF 和 DN'],a:1,w:'N4：SMF ↔ UPF。AMF–SMF 是 N11，gNB–UPF 是 N3，UPF–DN 是 N6。'},
+ {id:'m_a2_3',u:'a2',p:'P.23-25',q:'哪一組對應是錯的？',o:['N2：(R)AN ↔ AMF','N9：UPF ↔ UPF','N32：SEPP ↔ SEPP','N16：AMF ↔ AMF'],a:3,w:'N16 是 SMF ↔ SMF（漫遊時 V-SMF ↔ H-SMF）。AMF ↔ AMF 是 N14。'},
+ {id:'m_a2_4',u:'a2',p:'P.7, 9',q:'關於 SBA，哪一個是錯的？',o:['5GC 控制面 NF 之間只能用服務化介面互動','可以經過 SCP 間接溝通','SCP 自己也對外提供服務','有服務化和參考點兩種表示法'],a:2,w:'SCP 不對外提供服務，它只是幫忙轉送的代理。'},
+ {id:'m_a2_5',u:'a2',p:'P.67',q:'這一版 5GS 支援哪一種 TSN 設定模型？',o:['Fully centralized','Fully distributed','Centralized network / distributed user','三種都支援'],a:0,w:'只支援 fully centralized。'},
+ {id:'m_a2_6',u:'a2',p:'P.24',q:'漫遊 LBO 時，拜訪網 PCF 和本籍網 PCF 之間是？',o:['N7','N15','N24','N32'],a:2,w:'N24：vPCF ↔ hPCF。N7 是 SMF–PCF，N15 是 AMF–PCF，N32 是 SEPP 之間。'},
+ {id:'m_a2_7',u:'a2',p:'P.20',q:'UDR 標準化的資料集「不包含」哪一個？',o:['Subscription Data','Policy Data','Structured Data for exposure','UE 的無線頻道量測資料'],a:3,w:'四種是 Subscription、Policy、Structured Data for exposure、Application data。'},
+ {id:'m_a2_8',u:'a2',p:'P.5',q:'5G 架構原則，哪一個是錯的？',o:['控制面和使用者面分開','支援 stateless NF（運算和儲存分開）','UP 功能可部署在靠近接取網路的地方','漫遊只支援 Home routed'],a:3,w:'Home routed 和 Local breakout 都支援。'},
+
+ {id:'m_a3_1',u:'a3',p:'P.6-7',q:'關於 AMF Load Balancing，哪一個是錯的？',o:['用 Weight Factor，通常依 AMF 容量設定','Weight Factor 由 AMF 經 NGAP 送給 5G-AN','只在同一個 AMF Set 內平衡','Weight Factor 應該經常調整，例如每分鐘一次'],a:3,w:'Weight Factor 不該常改，成熟網路大約每月才調整。'},
+ {id:'m_a3_2',u:'a3',p:'P.9-11',q:'關於 AMF 過載控制，哪一個是錯的？',o:['NGAP OVERLOAD START 可以帶 S-NSSAI，限制特定切片','可指定要拒絕的連線請求百分比','過載時仍盡量維持緊急服務和 MPS','過載時應先停止緊急服務來減輕負擔'],a:3,w:'過載時 AMF 應盡量維持緊急服務和 MPS。'},
+ {id:'m_a3_3',u:'a3',p:'P.22',q:'SMF 指揮 UPF 時，哪一項「不是」它使用的控制功能？',o:['UE IP 位址管理','CN Tunnel Info 管理','流量偵測（Traffic Detection）','無線資源排程（RB 分配）'],a:3,w:'無線資源排程在基地台。SMF 管：IP、隧道、流量偵測、轉送、計費、QoS policing、PCC、End marker。'},
+ {id:'m_a3_4',u:'a3',p:'P.28',q:'IP 型 PDU Session 的 Traffic Detection Information「不包含」？',o:['CN tunnel info','QFI','Application Identifier','UE 的 SUPI（用戶永久識別碼）'],a:3,w:'包含：CN tunnel info、Network instance、QFI、IP Packet Filter Set、Application ID、FQDN Filter。'},
+ {id:'m_a3_5',u:'a3',p:'P.59',q:'SMF 給 UPF 的緩衝指示，「不包含」哪一個行為？',o:['緩衝下行封包，並回報第一個下行封包到達','丟棄下行封包，並回報第一個被丟的封包','緩衝上行封包','把緩衝的封包交給 AMF 保存'],a:3,w:'行為只有：緩衝下行、丟棄下行、緩衝上行。AMF 不存資料封包。'},
+ {id:'m_a3_6',u:'a3',p:'P.13',q:'NAS 層壅塞控制靠什麼讓手機晚點再來？',o:['Weight Factor','Back-off timer','Session-AMBR','TEID'],a:1,w:'給 UE 一個 back-off 時間，而且每支手機時間錯開，避免同時湧回。'},
+ {id:'m_a3_7',u:'a3',p:'P.25-26',q:'關於 CN Tunnel Info，哪一個是錯的？',o:['包含 TEID 和 IP 位址','用在 N3 / N9 隧道','由 UPF 負責分配與釋放','由 AMF 負責分配'],a:3,w:'由 UPF 分配，SMF 透過 N4 告訴它何時要分配。'},
+ {id:'m_a3_8',u:'a3',p:'P.58',q:'關於緩衝（buffering），哪一個正確？',o:['UPF 支援緩衝是必要的，SMF 是選配','SMF 支援緩衝是必要的，UPF 是選配','兩者都是必要的','只有 AMF 能緩衝'],a:0,w:'UPF 必須支援，SMF 可選。'},
+ {id:'m_a3_9',u:'a3',p:'P.63-64',q:'哪一個 N4 規則決定封包要「轉送、丟棄或緩衝」？',o:['PDR','FAR','URR','QER'],a:1,w:'PDR 認封包、FAR 決定怎麼處理、URR 計量、QER 管 QoS。'},
+ {id:'m_a3_10',u:'a3',p:'P.35',q:'關於 QoS policing，哪一個是錯的？',o:['ARP 用於允入控制','ARP 的值不需要給 UPF','SMF 給 UPF Session-AMBR，讓它限制所有 Non-GBR 流','GBR 流的 GFBR、MFBR 由 AMF 給 UPF'],a:3,w:'是 SMF 給 UPF。'},
+
+ {id:'m_c1_1',u:'c1',p:'P.56',q:'5QI 比 LTE 的 QCI 多了哪一種資源類型？',o:['GBR','Non-GBR','Delay Critical GBR','Best Effort'],a:2,w:'Delay Critical GBR 是新的。'},
+ {id:'m_c1_2',u:'c1',p:'P.57',q:'5QI 1（通話語音）的封包延遲預算是？',o:['10 ms','50 ms','100 ms','300 ms'],a:2,w:'100 ms，錯誤率 10⁻²。'},
+ {id:'m_c1_3',u:'c1',p:'P.65-67',q:'關於 RTP，哪一個是錯的？',o:['大多跑在 UDP 上','序號用來偵測遺失和亂序','RTP 用偶數埠，RTCP 用下一個奇數埠','RTP 通常跑在 TCP 上，因為可靠'],a:3,w:'TCP 重視可靠勝過即時，所以 RTP 通常不用 TCP。'},
+ {id:'m_c1_4',u:'c1',p:'P.76',q:'H.323 中走 UDP 的是？',o:['H.225','H.245','RAS 和 RTP','全部走 TCP'],a:2,w:'H.225、H.245 走 TCP；RAS、RTP 走 UDP。'},
+ {id:'m_c1_5',u:'c1',p:'P.35',q:'gNB 拆成 CU / DU 時，RRC 在哪裡？',o:['gNB-DU','gNB-CU-CP','gNB-CU-UP','UPF'],a:1,w:'CU-CP 放 RRC 和 PDCP 的控制面部分。'},
+ {id:'m_c1_6',u:'c1',p:'P.36',q:'IAB 節點由哪兩部分組成？',o:['MT 和 DU','CU 和 UPF','AMF 和 SMF','RU 和 SEPP'],a:0,w:'MT 連上游 donor，DU 服務手機或下一個 IAB 節點。'},
+
+ {id:'m_c3_1',u:'c3',p:'P.15',q:'S-NSSAI 的組成是？',o:['SST 8 bits + SD 24 bits','SST 24 bits + SD 8 bits','SST 16 bits + SD 16 bits','只有 SST 32 bits'],a:0,w:'SST 8、SD 24，共 32 bits。'},
+ {id:'m_c3_2',u:'c3',p:'P.22',q:'哪一組核心網功能由所有切片共用？',o:['UDM 和 NSSF','UPF 和 SMF','PCF 和 NRF（一定共用）','AMF 和 UPF'],a:0,w:'UDM、NSSF 共用；NRF、PCF 可共用也可專屬。'},
+ {id:'m_c3_3',u:'c3',p:'P.20',q:'在 RAN 端做切片即時優化的是？',o:['Near-RT RIC','NSSF','SEPP','N3IWF'],a:0,w:'O-RAN 定義的 Near-RT RIC，用 AI/ML 即時控制。'},
+ {id:'m_c3_4',u:'c3',p:'P.29-30',q:'關於切片要求，哪一個是錯的？',o:['一片的流量不應影響其他片','營運商可定義切片最小和最大容量','多片搶資源時可設優先順序','UE 同一時間只能使用一個切片'],a:3,w:'5G 系統應允許 UE 同時被指派到多個切片。'}
+];
+
+/* ---------- 名詞 ---------- */
+const TERMS = [
+ ['3GPP','3rd Generation Partnership Project','第三代合作夥伴計畫','寫行動通訊規格的國際組織，Release 就是它出的版本。'],
+ ['ITU-R','ITU Radiocommunication Sector','國際電信聯盟 無線電部門','聯合國底下管無線電頻譜的單位，負責訂「幾 G 要達到什麼數字」。'],
+ ['IMT-2020','International Mobile Telecommunications-2020','5G 官方規格','ITU 對 5G 的要求清單，例如 20 Gbps、1 ms。'],
+ ['IMT-2030','International Mobile Telecommunications-2030','6G 官方框架','ITU 對 6G 的願景，6 個情境 + 4 個原則。'],
+ ['IMT-Advanced','International Mobile Telecommunications-Advanced','4G 官方規格','ITU 對 4G 的要求。'],
+ ['NGMN','Next Generation Mobile Networks','下一代行動網路聯盟','電信營運商組成的聯盟，2015 年寫了 5G 願景白皮書。'],
+ ['Release','3GPP Release','規格版本','3GPP 的版本號，像軟體版本。R15 是第一個 5G 版。'],
+ ['UE','User Equipment','使用者裝置','就是你的手機（或任何連網設備）。'],
+ ['gNB','next Generation NodeB','5G 基地台','5G 的基地台。g = 5G。'],
+ ['eNB','evolved NodeB','4G 基地台','4G LTE 的基地台。'],
+ ['RAN','Radio Access Network','無線接取網路','基地台那一段，負責和手機用無線電溝通。'],
+ ['NG-RAN','Next Generation RAN','5G 無線接取網路','5G 版的 RAN，裡面是 gNB（也可以有 ng-eNB）。'],
+ ['5GC','5G Core','5G 核心網','5G 的「大腦＋主幹道」，由一堆 NF 組成。'],
+ ['EPC','Evolved Packet Core','4G 核心網','4G 的核心網，主要有 MME、S-GW、P-GW、HSS。'],
+ ['EPS','Evolved Packet System','4G 系統','EPS = E-UTRAN（4G 基地台）+ EPC（4G 核心網）。'],
+ ['MME','Mobility Management Entity','移動管理實體','4G 的控制大腦，管手機在哪、要不要呼叫它。5G 對應 AMF。'],
+ ['S-GW','Serving Gateway','服務閘道','4G 裡轉送使用者資料的節點。'],
+ ['P-GW','PDN Gateway','封包資料網路閘道','4G 裡通往網際網路的出口。'],
+ ['HSS','Home Subscriber Server','用戶資料伺服器','4G 的用戶資料庫。5G 對應 UDM。'],
+ ['AMF','Access and Mobility Management Function','存取與移動管理功能','5G 的「門口警衛＋定位員」：讓手機註冊、追蹤手機在哪。'],
+ ['SMF','Session Management Function','會話管理功能','5G 的「連線管家」：建立上網連線、發 IP、指揮 UPF。'],
+ ['UPF','User Plane Function','使用者平面功能','5G 的「資料搬運工」：真正把封包送進送出。'],
+ ['AUSF','Authentication Server Function','認證伺服器功能','確認「你真的是你」的驗證中心。'],
+ ['UDM','Unified Data Management','統一資料管理','用戶資料管理（簽約內容、金鑰），5G 版的 HSS。'],
+ ['UDR','Unified Data Repository','統一資料儲存庫','真正存資料的資料庫，UDM、PCF、NEF 都來這裡讀寫。'],
+ ['PCF','Policy Control Function','政策控制功能','訂規則的人：誰可以多快、怎麼計費。'],
+ ['NRF','Network Repository Function','網路儲存庫功能','NF 的通訊錄：誰在哪、提供什麼服務都在這查。'],
+ ['NSSF','Network Slice Selection Function','網路切片選擇功能','幫手機選要用哪一片網路切片。'],
+ ['NEF','Network Exposure Function','網路能力開放功能','對外的窗口，讓外部 App 安全地使用 5G 的能力。'],
+ ['AF','Application Function','應用功能','應用服務那一側，可以向 5GC 提需求。'],
+ ['SCP','Service Communication Proxy','服務通訊代理','幫 NF 之間轉送訊息的代理，自己不提供服務。'],
+ ['SEPP','Security Edge Protection Proxy','安全邊界保護代理','兩家電信之間的「國界海關」，漫遊信令都經過它（N32）。'],
+ ['N3IWF','Non-3GPP InterWorking Function','非 3GPP 互通功能','讓「不可信任」的 Wi-Fi 接進 5G 核心網的閘道，用 IPsec 保護。'],
+ ['TNGF','Trusted Non-3GPP Gateway Function','可信任非 3GPP 閘道','讓「可信任」的 Wi-Fi 接進 5G 核心網。'],
+ ['W-AGF','Wireline Access Gateway Function','有線接取閘道','讓有線網路（例如家用寬頻）接進 5G 核心網。'],
+ ['DN','Data Network','資料網路','UPF 外面的世界，例如網際網路。'],
+ ['NF','Network Function','網路功能','5G 核心網裡的每一個軟體元件（AMF、SMF…）。'],
+ ['SBA','Service-Based Architecture','服務化架構','NF 都把功能做成 API 服務，互相呼叫。'],
+ ['SBI','Service-Based Interface','服務化介面','NF 對外的 API，命名像 Namf、Nsmf，用 HTTP/2。'],
+ ['PLMN','Public Land Mobile Network','公眾陸地行動網路','一家電信的行動網路。'],
+ ['HPLMN','Home PLMN','本籍網路','你辦門號的那家電信。'],
+ ['VPLMN','Visited PLMN','拜訪網路','漫遊時你正在用的外地電信。'],
+ ['LBO','Local Breakout','本地分流','漫遊時資料在當地直接出去，路比較短。'],
+ ['Home routed','Home Routed','本籍路由','漫遊時資料繞回本籍網才出去，本籍電信掌控度高。'],
+ ['NSA','Non-Standalone','非獨立組網','5G 基地台要靠 4G 基地台和 4G 核心網才能運作。'],
+ ['SA','Standalone','獨立組網','5G 基地台接 5G 核心網，完全不靠 4G。'],
+ ['EN-DC','E-UTRA–NR Dual Connectivity','4G/5G 雙連線','手機同時連 4G eNB（主）和 5G gNB（副），就是 Option 3。'],
+ ['eMBB','enhanced Mobile Broadband','增強型行動寬頻','要「快」的服務：高畫質影片、VR。'],
+ ['URLLC','Ultra-Reliable Low-Latency Communications','超可靠低延遲通訊','要「反應快又不能出錯」的服務：自駕車、遠端手術。'],
+ ['mMTC','massive Machine Type Communications','大量機器型通訊','要「接很多台」的服務：感測器、智慧電表。'],
+ ['NAS','Non-Access Stratum','非接取層','手機和核心網（AMF/SMF）直接講話的那一層信令，基地台只轉送不看。'],
+ ['NGAP','NG Application Protocol','NG 應用協定','基地台和 AMF 之間（N2）講話用的協定。'],
+ ['PFCP','Packet Forwarding Control Protocol','封包轉送控制協定','SMF 指揮 UPF（N4）用的協定。'],
+ ['PDU Session','Protocol Data Unit Session','PDU 會話','手機到某個 DN 的一條上網連線。'],
+ ['QoS Flow','QoS Flow','QoS 流','PDU Session 裡面再分的小水管，每條有自己的品質等級。'],
+ ['QFI','QoS Flow Identifier','QoS 流識別碼','QoS 流的編號。'],
+ ['5QI','5G QoS Identifier','5G QoS 識別碼','代表「這種流量的品質要求」的號碼，等於 4G 的 QCI。'],
+ ['QCI','QoS Class Identifier','QoS 等級識別碼','4G 的品質等級號碼。'],
+ ['GBR','Guaranteed Bit Rate','保證位元率','保證給你這麼多頻寬的流量類型。'],
+ ['PDR','Packet Detection Rule','封包偵測規則','N4 規則：怎麼認出「這個封包屬於誰」。'],
+ ['FAR','Forwarding Action Rule','轉送動作規則','N4 規則：認出來之後要轉送、丟掉還是緩衝。'],
+ ['URR','Usage Reporting Rule','用量回報規則','N4 規則：怎麼計算用量、何時回報。'],
+ ['QER','QoS Enforcement Rule','QoS 執行規則','N4 規則：限速、標記 QoS。'],
+ ['MAR','Multi-Access Rule','多接取規則','N4 規則：ATSSS 時流量怎麼分到 5G 和 Wi-Fi。'],
+ ['SRR','Session Reporting Rule','會話回報規則','N4 規則：回報和用量無關的事件，例如 QoS 監測。'],
+ ['TEID','Tunnel Endpoint Identifier','隧道端點識別碼','GTP-U 隧道的編號，加上 IP 就是 CN Tunnel Info。'],
+ ['GTP-U','GPRS Tunnelling Protocol - User plane','GTP 使用者面隧道協定','N3、N9 上把使用者封包包起來傳的隧道協定。'],
+ ['ATSSS','Access Traffic Steering, Switching, Splitting','接取流量導引、切換、分流','手機同時用 5G 和 Wi-Fi，決定資料走哪條路。'],
+ ['MPTCP','Multipath TCP','多路徑 TCP','一條 TCP 連線同時用多條路傳。'],
+ ['MPQUIC','Multipath QUIC','多路徑 QUIC','QUIC 版本的多路徑傳輸。'],
+ ['PMF','Performance Measurement Function','效能量測功能','ATSSS 裡量兩條路延遲和丟包的功能。'],
+ ['TSN','Time Sensitive Networking','時間敏感網路','IEEE 的乙太網路標準，讓資料準時到（工廠自動化用）。'],
+ ['DS-TT','Device-side TSN Translator','裝置端 TSN 轉換器','在手機端，把 5G 轉成 TSN 看得懂的樣子。'],
+ ['NW-TT','Network-side TSN Translator','網路端 TSN 轉換器','在 UPF 端做同樣的轉換。'],
+ ['DetNet','Deterministic Networking','確定性網路','IETF 版本的「準時送達」網路，5GS 可以當 DetNet 路由器。'],
+ ['NTN','Non-Terrestrial Network','非地面網路','用衛星或高空平台提供的網路。'],
+ ['LEO','Low Earth Orbit','低軌衛星','500–2,000 km，延遲低，例如 Starlink。'],
+ ['MEO','Medium Earth Orbit','中軌衛星','8,000–20,000 km。'],
+ ['GEO','Geostationary Earth Orbit','地球同步軌道','35,786 km，跟著地球轉，看起來不動，延遲最大。'],
+ ['HEO','Highly Elliptical Orbit','高橢圓軌道','繞地球的橢圓形軌道。'],
+ ['HAPs','High Altitude Platforms','高空平台','8–50 km 的飛機、氣球、飛船。'],
+ ['Network Slicing','Network Slicing','網路切片','把一套實體網路切成好幾個虛擬網路，各自服務不同需求。'],
+ ['S-NSSAI','Single Network Slice Selection Assistance Information','單一網路切片選擇輔助資訊','切片的身分證：SST（8 bits）+ SD（24 bits）。'],
+ ['SST','Slice/Service Type','切片/服務類型','切片的大分類：eMBB、URLLC、mIoT。'],
+ ['SD','Slice Differentiator','切片區分器','同類切片裡再細分的編號。'],
+ ['Back-off timer','Back-off timer','退避計時器','網路叫手機「等這麼久再來」，避免大家同時擠進來。'],
+ ['Weight Factor','Weight Factor','權重因子','AMF 的權重，越大分到越多手機，按容量設定。'],
+ ['AMF Set','AMF Set','AMF 組','一群可以互相接手的 AMF，負載平衡只在同一組內做。'],
+ ['CM-IDLE','Connection Management IDLE','連線管理閒置','手機沒在傳資料、和 AMF 之間沒有信令連線的狀態。'],
+ ['MPS','Multimedia Priority Service','多媒體優先服務','政府、救災單位的優先通訊，過載時也要盡量保留。'],
+ ['IPsec','IP Security','IP 安全協定','在 IP 層加密的隧道，non-3GPP 接取時 UE 和 N3IWF 之間用它。'],
+ ['Session-AMBR','Session Aggregate Maximum Bit Rate','會話總最大速率','一個 PDU Session 所有 Non-GBR 流加起來的速度上限。'],
+ ['ARP','Allocation and Retention Priority','分配與保留優先權','資源不夠時誰可以搶、誰可以被搶。不用給 UPF。'],
+ ['IPUPS','Inter PLMN User Plane Security','跨 PLMN 使用者面安全','放在邊界的 UPF 功能，擋掉不合法的跨國 N9 封包。'],
+ ['NWDAF','Network Data Analytics Function','網路資料分析功能','5GC 裡做數據分析、預測的 NF。'],
+ ['RTP','Real-time Transport Protocol','即時傳輸協定','傳語音、影片的協定，通常跑在 UDP 上。'],
+ ['RTCP','RTP Control Protocol','RTP 控制協定','RTP 的搭檔，回報品質和做同步。'],
+ ['SIP','Session Initiation Protocol','會話初始協定','用來建立通話的信令協定。'],
+ ['H.323','ITU-T H.323','H.323 標準','老牌的 VoIP 與視訊會議標準。'],
+ ['QoE','Quality of Experience','體驗品質','使用者主觀覺得好不好用。'],
+ ['MOS','Mean Opinion Score','平均意見分數','請人打分數再平均，用來量 QoE。'],
+ ['RedCap','Reduced Capability','降規裝置','規格較低、便宜省電的 5G 裝置，例如穿戴裝置（R17）。'],
+ ['IAB','Integrated Access and Backhaul','整合接取與回傳','基地台用無線方式接回網路，不用拉光纖。'],
+ ['RIC','RAN Intelligent Controller','RAN 智慧控制器','O-RAN 定義、用 AI/ML 控制基地台的元件。'],
+ ['Doppler','Doppler shift','都卜勒頻移','發射端在動，收到的頻率會偏移；衛星越快偏越多。'],
+ ['Latency','Latency','延遲','資料從一端到另一端要花的時間。'],
+ ['free5GC','free5GC','free5GC','台灣陽明交大開發的開源 5G 核心網，Go 語言。'],
+ ['Open5GS','Open5GS','Open5GS','開源 4G/5G 核心網，C 語言。'],
+ ['UERANSIM','UERANSIM','UERANSIM','開源的手機加基地台模擬器。']
+];
+
+</script>
+<script>
+(function(){
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const unitOf=id=>UNITS.find(u=>u.id===id);
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+
+/* ---------- storage ---------- */
+const KEY='g5-review-v1';
+let S={c:{},m:{}};
+try{const r=localStorage.getItem(KEY);if(r)S=Object.assign(S,JSON.parse(r));}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}};
+
+/* ---------- glossary linking ---------- */
+const TMAP={};TERMS.forEach(t=>TMAP[t[0]]=t);
+const keys=TERMS.map(t=>t[0]).sort((a,b)=>b.length-a.length).map(k=>k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'));
+const TRE=new RegExp('(?<![A-Za-z0-9])('+keys.join('|')+')(?![A-Za-z0-9])','g');
+function link(text,used){
+  return esc(text).replace(TRE,(m)=>{
+    if(used.has(m))return m;
+    used.add(m);
+    return '<span class="t" tabindex="0" role="button" data-t="'+esc(m)+'">'+m+'</span>';
+  });
+}
+
+/* ---------- toast ---------- */
+let tt;
+function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),1400);}
+
+/* ---------- views ---------- */
+let view='home';
+function go(v){
+  view=v;
+  document.querySelectorAll('.view').forEach(e=>e.classList.toggle('on',e.id==='v-'+v));
+  document.querySelectorAll('#nav button').forEach(b=>b.setAttribute('aria-current',b.dataset.v===v?'true':'false'));
+  closePop();hideTip();
+  if(v==='home')renderHome();
+  if(v==='list')renderList();
+  if(v==='cards'&&!cq.length)buildCards();
+  if(v==='mcq'&&!mq.length)buildMcq();
+  window.scrollTo(0,0);
+}
+document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>go(b.dataset.v));
+
+/* ---------- home ---------- */
+function renderHome(){
+  $('#f-note').textContent='注意：'+UNITS[0].note;
+  $('#units').innerHTML=UNITS.map(u=>{
+    const cs=CARDS.filter(c=>c.u===u.id), ms=MCQ.filter(m=>m.u===u.id);
+    const g=cs.filter(c=>S.c[c.id]==='good').length, mr=ms.filter(m=>S.m[m.id]===1).length;
+    const pct=Math.round(100*(g+mr)/Math.max(1,cs.length+ms.length));
+    return '<div class="unit"><div class="tag">'+esc(u.short)+'</div><div><div class="nm">'+esc(u.name)+'</div><div class="meter"><i style="width:'+pct+'%"></i></div></div><div class="num">卡 '+g+'/'+cs.length+'<br>選 '+mr+'/'+ms.length+'</div></div>';
+  }).join('');
+}
+$('#go5').onclick=()=>{cardUnit='all';cardMode='all';buildCards(5);go('cards');};
+$('#goWeak').onclick=()=>{cardUnit='all';cardMode='weak';buildCards();go('cards');};
+$('#goMcq').onclick=()=>{mcqUnit='all';mcqMode='all';buildMcq(10);go('mcq');};
+$('#reset').onclick=()=>{
+  const b=$('#reset');
+  if(b.dataset.armed){S={c:{},m:{}};save();renderHome();b.textContent='清除進度';delete b.dataset.armed;toast('進度已清除');}
+  else{b.dataset.armed='1';b.textContent='再按一次確認清除';setTimeout(()=>{b.textContent='清除進度';delete b.dataset.armed;},3000);}
+};
+
+/* ---------- cards ---------- */
+let cardUnit='all',cardMode='all',cq=[],ci=0,shown=false,sessionGood=0,sessionWeak=0;
+function chipsFor(box,cur,mode,modes,onU,onM){
+  box.innerHTML=[['all','全部']].concat(UNITS.map(u=>[u.id,u.short])).map(([id,n])=>'<button type="button" class="chip" data-u="'+id+'" aria-pressed="'+(cur===id)+'">'+esc(n)+'</button>').join('')
+   +modes.map(([id,n],i)=>'<button type="button" class="chip'+(i===0?' sep':'')+'" data-m="'+id+'" aria-pressed="'+(mode===id)+'">'+esc(n)+'</button>').join('');
+  box.querySelectorAll('[data-u]').forEach(b=>b.onclick=()=>onU(b.dataset.u));
+  box.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>onM(b.dataset.m));
+}
+function buildCards(limit){
+  let pool=CARDS.filter(c=>cardUnit==='all'||c.u===cardUnit);
+  if(cardMode==='weak')pool=pool.filter(c=>S.c[c.id]!=='good');
+  if(limit){
+    const rank=c=>S.c[c.id]==='weak'?0:(S.c[c.id]?2:1);
+    pool=shuffle(pool).sort((a,b)=>rank(a)-rank(b)).slice(0,limit);
+  }
+  cq=pool;ci=0;shown=false;sessionGood=0;sessionWeak=0;
+  chipsFor($('#cardChips'),cardUnit,cardMode,[['all','全部卡'],['weak','還不熟＋沒看過']],
+    u=>{cardUnit=u;buildCards();},m=>{cardMode=m;buildCards();});
+  renderCard();
+}
+function figHTML(k){return '<div class="figwrap">'+FIG[k]()+'</div>';}
+function renderCard(){
+  const box=$('#cardBox');
+  if(!cq.length){box.innerHTML='<div class="card done"><h3>這裡沒有要練的卡了</h3><p>換一章，或切回「全部卡」。</p></div>';return;}
+  if(ci>=cq.length){
+    box.innerHTML='<div class="card done"><h3>這一輪結束</h3><p>會了 '+sessionGood+' 張，還不熟 '+sessionWeak+' 張。休息一下再繼續。</p><div class="actions" style="justify-content:center"><button class="btn primary" type="button" id="again5">再來 5 張</button><button class="btn" type="button" id="toMcq">去做選擇題</button></div></div>';
+    $('#again5').onclick=()=>buildCards(5);$('#toMcq').onclick=()=>go('mcq');return;
+  }
+  const c=cq[ci],u=unitOf(c.u),st=S.c[c.id],used=new Set();
+  let h='<article class="card"><div class="meta"><span class="u">'+esc(u.short)+'</span>'+(c.p?'<span>講義 '+esc(c.p)+'</span>':'')
+    +(st?'<span class="st '+(st==='good'?'good':'warn')+'">'+(st==='good'?'會了':'還不熟')+'</span>':'<span class="st">新的</span>')+'</div>'
+    +'<h2 class="q">'+esc(c.q)+'</h2>'+(c.zh?'<p class="qz">'+link(c.zh,used)+'</p>':'');
+  if(!shown){
+    h+='<div class="actions"><button class="btn primary" type="button" id="rv">顯示答案<kbd>Space</kbd></button><span class="sp">'+(ci+1)+' / '+cq.length+'</span></div><p class="hint">先在腦中講一遍答案，再按顯示。</p>';
+  }else{
+    h+='<div class="reveal"><div class="keyline"><small>先記這句</small>'+link(c.key,used)+'</div>'
+      +'<ul class="pts">'+c.pts.map(p=>'<li>'+link(p,used)+'</li>').join('')+'</ul>'
+      +(c.plain?'<div class="plain"><small>白話</small>'+link(c.plain,used)+'</div>':'')
+      +(c.dia?figHTML(c.dia):'')
+      +(c.chk?'<p class="chk">待對照：這題的數字請翻講義 '+esc(c.p)+' 確認。</p>':'')
+      +'</div><div class="actions"><button class="btn warn" type="button" id="bw">還不熟<kbd>1</kbd></button><button class="btn primary" type="button" id="bg">我會了<kbd>2</kbd></button><span class="sp">'+(ci+1)+' / '+cq.length+'</span></div>';
+  }
+  h+='</article>';
+  box.innerHTML=h;
+  if(!shown)$('#rv').onclick=reveal;else{$('#bw').onclick=()=>mark('weak');$('#bg').onclick=()=>mark('good');}
+}
+function reveal(){shown=true;renderCard();}
+function mark(s){
+  const c=cq[ci];S.c[c.id]=s;save();
+  if(s==='good'){sessionGood++;toast('記下來了');}else{sessionWeak++;toast('之後再練一次');}
+  ci++;shown=false;renderCard();window.scrollTo(0,0);
+}
+
+/* ---------- mcq ---------- */
+let mcqUnit='all',mcqMode='all',mq=[],mi=0,picked=null,order=[],rRight=0,rDone=0;
+function buildMcq(limit){
+  let pool=MCQ.filter(m=>mcqUnit==='all'||m.u===mcqUnit);
+  if(mcqMode==='wrong')pool=pool.filter(m=>S.m[m.id]===0);
+  pool=shuffle(pool);if(limit)pool=pool.slice(0,limit);
+  mq=pool;mi=0;picked=null;rRight=0;rDone=0;
+  chipsFor($('#mcqChips'),mcqUnit,mcqMode,[['all','全部題'],['wrong','只做錯過的']],
+    u=>{mcqUnit=u;buildMcq();},m=>{mcqMode=m;buildMcq();});
+  renderMcq();
+}
+function renderScore(){
+  const ever=MCQ.filter(m=>S.m[m.id]===1).length;
+  $('#mcqScore').innerHTML='<span>本輪 <b>'+rRight+'</b> / '+rDone+'</span><span>答對過 <b>'+ever+'</b> / '+MCQ.length+'</span>';
+}
+function renderMcq(){
+  renderScore();
+  const box=$('#mcqBox');
+  if(!mq.length){box.innerHTML='<div class="card done"><h3>沒有符合的題目</h3><p>'+(mcqMode==='wrong'?'沒有錯過的題目，很好。':'換一章試試。')+'</p></div>';return;}
+  if(mi>=mq.length){
+    box.innerHTML='<div class="card done"><h3>這一輪答對 '+rRight+' / '+rDone+'</h3><p>錯的題目已經記下來，可以按「只做錯過的」重練。</p><div class="actions" style="justify-content:center"><button class="btn primary" type="button" id="m10">再來 10 題</button><button class="btn warn" type="button" id="mw">只做錯過的</button></div></div>';
+    $('#m10').onclick=()=>{mcqMode='all';buildMcq(10);};$('#mw').onclick=()=>{mcqMode='wrong';buildMcq();};return;
+  }
+  const m=mq[mi],u=unitOf(m.u),used=new Set();
+  if(picked===null)order=shuffle(m.o.map((_,i)=>i));
+  let h='<article class="card"><div class="meta"><span class="u">'+esc(u.short)+'</span><span>講義 '+esc(m.p)+'</span><span class="st">'+(mi+1)+' / '+mq.length+'</span></div><h2 class="q">'+link(m.q,used)+'</h2><div class="opts">';
+  order.forEach((oi,k)=>{
+    let cls='opt';
+    if(picked!==null){if(oi===m.a)cls+=' right';else if(oi===picked)cls+=' wrong';}
+    h+='<button type="button" class="'+cls+'" data-i="'+oi+'"'+(picked!==null?' disabled':'')+'><span class="k">'+'ABCD'[k]+'</span><span>'+link(m.o[oi],used)+'</span></button>';
+  });
+  h+='</div>';
+  if(picked!==null){
+    const ok=picked===m.a;
+    h+='<div class="why"><b style="color:var(--'+(ok?'good':'bad')+')">'+(ok?'答對':'答錯')+'</b>　'+link(m.w,used)+'</div><div class="actions"><button class="btn primary" type="button" id="mn">下一題<kbd>Enter</kbd></button></div>';
+  }else h+='<p class="hint">按鍵盤 1–4 也可以作答。</p>';
+  h+='</article>';
+  box.innerHTML=h;
+  box.querySelectorAll('.opt').forEach(b=>b.onclick=e=>{if(!HOVER&&e.target.closest('.t'))return;pick(+b.dataset.i);});
+  if(picked!==null)$('#mn').onclick=nextMcq;
+}
+function pick(i){
+  if(picked!==null)return;
+  const m=mq[mi];picked=i;rDone++;
+  if(i===m.a){rRight++;S.m[m.id]=1;}else S.m[m.id]=0;
+  save();renderMcq();
+}
+function nextMcq(){mi++;picked=null;renderMcq();window.scrollTo(0,0);}
+
+/* ---------- glossary ---------- */
+function renderTerms(q){
+  q=(q||'').trim().toLowerCase();
+  const list=TERMS.filter(t=>!q||t.join(' ').toLowerCase().includes(q));
+  $('#gl').innerHTML=list.length?list.map(t=>'<div class="gi"><div class="ab">'+esc(t[0])+'</div><div><div class="zh">'+esc(t[2])+'</div><div class="fn">'+esc(t[1])+'</div><div class="pl">'+esc(t[3])+'</div></div></div>').join(''):'<p class="hint">找不到，換個關鍵字試試。</p>';
+}
+$('#q').addEventListener('input',e=>renderTerms(e.target.value));
+
+/* ---------- popover ---------- */
+function openPop(k){
+  const t=TMAP[k];if(!t)return;
+  $('#popc').innerHTML='<div class="ab">'+esc(t[0])+'</div><div class="fn">'+esc(t[1])+'</div><div class="zh">'+esc(t[2])+'</div><div class="pl">'+esc(t[3])+'</div>';
+  $('#pop').classList.add('on');
+}
+function closePop(){$('#pop').classList.remove('on');}
+$('#popx').onclick=closePop;
+const HOVER=window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+const tip=$('#tip');
+function showTip(el){
+  const t=TMAP[el.dataset.t];if(!t)return;
+  tip.innerHTML='<div class="ab">'+esc(t[0])+'　<span style="font-family:var(--body);color:var(--text);font-weight:500">'+esc(t[2])+'</span></div><div class="fn">'+esc(t[1])+'</div><div class="pl">'+esc(t[3])+'</div>';
+  tip.classList.add('on');
+  const r=el.getBoundingClientRect(),w=tip.offsetWidth,th=tip.offsetHeight;
+  let left=r.left+r.width/2-w/2;left=Math.max(8,Math.min(left,document.documentElement.clientWidth-w-8));
+  let below=r.top-th-10<60;
+  tip.classList.toggle('below',below);
+  tip.style.left=(left+window.scrollX)+'px';
+  tip.style.top=((below?r.bottom+10:r.top-th-10)+window.scrollY)+'px';
+  tip.style.setProperty('--ax',Math.max(10,Math.min(w-20,r.left+r.width/2-left-5))+'px');
+}
+function hideTip(){tip.classList.remove('on');}
+document.addEventListener('mouseover',e=>{const t=e.target.closest('.t');if(t&&HOVER)showTip(t);});
+document.addEventListener('mouseout',e=>{if(e.target.closest('.t'))hideTip();});
+document.addEventListener('focusin',e=>{if(e.target.classList&&e.target.classList.contains('t'))showTip(e.target);});
+document.addEventListener('focusout',hideTip);
+window.addEventListener('scroll',hideTip,{passive:true});
+document.addEventListener('click',e=>{
+  const t=e.target.closest('.t');
+  if(t&&!HOVER){openPop(t.dataset.t);return;}
+  if(!e.target.closest('#pop'))closePop();
+});
+
+/* ---------- keyboard ---------- */
+document.addEventListener('keydown',e=>{
+  if(e.target.matches('input,textarea'))return;
+  if(e.key==='Escape'){closePop();return;}
+  if(e.target.classList&&e.target.classList.contains('t')&&e.key==='Enter'){openPop(e.target.dataset.t);e.preventDefault();return;}
+  if(e.target.tagName==='BUTTON'&&(e.key==='Enter'||e.key===' '))return;
+  if(view==='cards'&&ci<cq.length){
+    if(!shown&&(e.key===' '||e.key==='Enter')){e.preventDefault();reveal();}
+    else if(shown&&e.key==='1')mark('weak');
+    else if(shown&&e.key==='2')mark('good');
+  }else if(view==='mcq'&&mi<mq.length){
+    if(picked===null&&/^[1-4]$/.test(e.key)){const k=+e.key-1;if(order[k]!==undefined)pick(order[k]);}
+    else if(picked!==null&&e.key==='Enter')nextMcq();
+  }
+});
+
+/* ---------- timer ---------- */
+const TOTAL=15*60;let left=TOTAL,tick=null;
+const fmt=s=>String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+function drawT(){$('#tleft').textContent=fmt(left);$('#tfill').style.width=(100*(TOTAL-left)/TOTAL)+'%';}
+$('#tbtn').onclick=()=>{
+  if(tick){clearInterval(tick);tick=null;$('#tbtn').textContent='繼續';return;}
+  $('#tbtn').textContent='暫停';
+  tick=setInterval(()=>{left--;drawT();if(left<=0){clearInterval(tick);tick=null;left=TOTAL;drawT();$('#tbtn').textContent='開始 15 分鐘';toast('15 分鐘到了，起來走走 3 分鐘');}},1000);
+};
+drawT();
+
+/* ---------- figures ---------- */
+function box(x,y,w,h,t,sub,hl){
+  return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="7" style="fill:var(--raise);stroke:'+(hl?'var(--accent)':'var(--line)')+';stroke-width:1.5"/>'
+   +'<text x="'+(x+w/2)+'" y="'+(y+h/2+(sub?-1:5))+'" text-anchor="middle" style="fill:var(--text);font-size:14px;font-weight:700">'+t+'</text>'
+   +(sub?'<text x="'+(x+w/2)+'" y="'+(y+h/2+14)+'" text-anchor="middle" style="fill:var(--muted);font-size:11px">'+sub+'</text>':'');
+}
+function ln(x1,y1,x2,y2,ctrl,mk){
+  return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" style="stroke:'+(ctrl?'var(--muted)':'var(--accent)')+';stroke-width:'+(ctrl?1.5:2.5)+(ctrl?';stroke-dasharray:6 4':'')+'"'+(mk?' marker-end="url(#'+mk+')"':'')+'/>';
+}
+function lb(x,y,t,anchor,col){return '<text x="'+x+'" y="'+y+'" text-anchor="'+(anchor||'start')+'" style="font-family:var(--display);font-size:12px;fill:'+(col||'var(--accent)')+'">'+t+'</text>';}
+function tx(x,y,t,anchor,size,col,w){return '<text x="'+x+'" y="'+y+'" text-anchor="'+(anchor||'start')+'" style="font-size:'+(size||13)+'px;fill:'+(col||'var(--text)')+';font-weight:'+(w||400)+'">'+t+'</text>';}
+
+const FIG={
+ sba(){
+  let s='<svg viewBox="0 0 800 380" role="img" aria-label="5G SBA 架構圖">';
+  [['NSSF',60,'Nnssf'],['NRF',220,'Nnrf'],['PCF',380,'Npcf'],['AUSF',540,'Nausf']].forEach(([n,x,i])=>{
+    s+=box(x,20,100,40,n);s+=ln(x+50,60,x+50,110,true);s+=lb(x+56,92,i);
+  });
+  s+='<line x1="40" y1="110" x2="760" y2="110" style="stroke:var(--muted);stroke-width:3"/>';
+  s+=lb(760,128,'SBI 服務匯流排（HTTP/2）','end','var(--muted)');
+  s+=ln(210,110,210,150,true)+lb(216,136,'Namf');
+  s+=ln(470,110,470,150,true)+lb(476,136,'Nsmf');
+  s+=box(160,150,100,40,'AMF','',1)+box(420,150,100,40,'SMF','',1);
+  s+=box(20,290,80,40,'UE')+box(160,290,100,40,'gNB')+box(380,290,100,40,'UPF')+box(540,290,100,40,'UPF')+box(700,290,80,40,'DN');
+  s+=ln(60,290,180,190,true)+lb(96,244,'N1');
+  s+=ln(222,290,222,190,true)+lb(230,248,'N2');
+  s+=ln(470,190,440,290,true)+lb(464,248,'N4');
+  s+=ln(260,310,380,310)+lb(320,302,'N3','middle');
+  s+=ln(480,310,540,310)+lb(510,302,'N9','middle');
+  s+=ln(640,310,700,310)+lb(670,302,'N6','middle');
+  s+=ln(40,362,80,362)+tx(88,366,'使用者資料','start',12,'var(--muted)');
+  s+=ln(190,362,230,362,true)+tx(238,366,'控制信令','start',12,'var(--muted)');
+  s+=tx(400,366,'上半部控制面、下半部資料面','start',12,'var(--muted)');
+  return s+'</svg>';
+ },
+ sbi(){
+  let s='<svg viewBox="0 0 800 300" role="img" aria-label="SBI 兩種互動流程"><defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--accent)"/></marker></defs>';
+  const panel=(ox,title)=>tx(ox,22,title,'start',15,'var(--text)',700)
+    +box(ox+20,36,120,36,'Consumer','NF A')+box(ox+240,36,120,36,'Producer','NF B')
+    +'<line x1="'+(ox+80)+'" y1="72" x2="'+(ox+80)+'" y2="285" style="stroke:var(--line);stroke-dasharray:3 4"/>'
+    +'<line x1="'+(ox+300)+'" y1="72" x2="'+(ox+300)+'" y2="285" style="stroke:var(--line);stroke-dasharray:3 4"/>';
+  s+=panel(20,'① Request–Response');
+  s+=ln(100,125,318,125,false,'ar')+tx(110,117,'1  Request（例：請建立 session）','start',12,'var(--muted)');
+  s+=ln(318,185,102,185,false,'ar')+tx(310,177,'2  Response（結果）','end',12,'var(--muted)');
+  s+=tx(210,240,'一問一答就結束','middle',12,'var(--muted)');
+  s+=panel(420,'② Subscribe–Notify');
+  s+=ln(500,110,718,110,false,'ar')+tx(510,102,'1  Subscribe（我要訂閱事件）','start',12,'var(--muted)');
+  s+=ln(718,150,502,150,false,'ar')+tx(710,142,'2  回覆 OK','end',12,'var(--muted)');
+  s+=tx(722,196,'…事件發生…','end',12,'var(--warn)');
+  s+=ln(718,232,502,232,false,'ar')+tx(710,224,'3  Notify（主動通知）','end',12,'var(--muted)');
+  s+=ln(500,272,718,272,false,'ar')+tx(510,264,'4  收到','start',12,'var(--muted)');
+  return s+'</svg>';
+ },
+ nsa(){
+  let s='<svg viewBox="0 0 790 260" role="img" aria-label="NSA Option 3、3a、3x">';
+  const dot=(x,y)=>'<circle cx="'+x+'" cy="'+y+'" r="6" style="fill:var(--warn)"/>';
+  const P=(ox,name,sub,mode)=>{
+    let p=box(ox+40,20,170,38,'EPC','4G 核心網（含 S-GW）');
+    p+=box(ox+10,150,95,38,'eNB','4G・主')+box(ox+145,150,95,38,'gNB','5G・副');
+    p+=ln(ox+40,58,ox+40,150,true)+lb(ox+36,108,'S1-C','end','var(--muted)');
+    if(mode!=='3x')p+=ln(ox+75,58,ox+75,150)+lb(ox+81,108,'S1-U');
+    if(mode!=='3')p+=ln(ox+192,58,ox+192,150)+lb(ox+198,108,'S1-U');
+    p+=ln(ox+105,169,ox+145,169,mode==='3a')+lb(ox+125,162,'X2','middle',mode==='3a'?'var(--muted)':'var(--accent)');
+    if(mode==='3')p+=dot(ox+75,150);
+    if(mode==='3a')p+=dot(ox+125,58);
+    if(mode==='3x')p+=dot(ox+192,150);
+    p+=tx(ox+125,220,name,'middle',14,'var(--text)',700)+tx(ox+125,242,sub,'middle',12,'var(--muted)');
+    return p;
+  };
+  s+=P(10,'Option 3','在 eNB 分流，經 X2 給 gNB','3');
+  s+=P(275,'Option 3a','在核心網 S-GW 分流','3a');
+  s+=P(540,'Option 3x','在 gNB 分流，經 X2 給 eNB','3x');
+  return s+'</svg>';
+ },
+ opt(){
+  const rows=[['Option 1','EPC','LTE eNB','—','純 4G（舊架構）'],['Option 2','5GC','gNB','—','純 5G，SA'],['Option 3 / 3a','EPC','LTE eNB','gNB','EN-DC，最早商轉的 NSA'],['Option 4 / 4a','5GC','gNB','eLTE eNB','NE-DC'],['Option 5','5GC','eLTE eNB','—','升級版 4G 基地台接 5G 核心網'],['Option 7 / 7a','5GC','eLTE eNB','gNB','NGEN-DC']];
+  return '<table class="opt-t"><thead><tr><th>選項</th><th>核心網</th><th>主基地台</th><th>副基地台</th><th>一句話</th></tr></thead><tbody>'+rows.map(r=>'<tr>'+r.map(c=>'<td>'+c+'</td>').join('')+'</tr>').join('')+'</tbody></table><p class="hint" style="margin:8px 4px 0">有 a：副基地台的使用者資料直接接核心網。沒有 a：資料經過主基地台。</p>';
+ },
+ roam(){
+  let s='<svg viewBox="0 0 800 270" role="img" aria-label="LBO 與 Home routed 比較">';
+  const region=(x,y,w,h,t)=>'<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="10" style="fill:none;stroke:var(--line);stroke-dasharray:5 4"/>'+tx(x+10,y+16,t,'start',11,'var(--muted)');
+  s+=tx(20,20,'Local Breakout（本地分流）','start',14,'var(--text)',700);
+  s+=region(130,30,400,92,'VPLMN 拜訪網（例：日本）')+region(560,30,225,92,'HPLMN 本籍網（台灣）');
+  s+=box(20,58,80,38,'UE')+box(160,58,110,38,'UPF','SMF 也在這')+box(390,58,120,38,'DN','當地出去');
+  s+=box(590,58,170,38,'UDM / AUSF','hPCF');
+  s+=ln(100,77,160,77)+ln(270,77,390,77);
+  s+=ln(510,92,590,92,true)+lb(550,86,'N24/N32','middle','var(--muted)');
+  s+=tx(20,160,'Home Routed（本籍路由）','start',14,'var(--text)',700);
+  s+=region(130,170,280,92,'VPLMN 拜訪網')+region(440,170,345,92,'HPLMN 本籍網');
+  s+=box(20,198,80,38,'UE')+box(160,198,110,38,'V-UPF','V-SMF')+box(480,198,110,38,'H-UPF','H-SMF')+box(660,198,110,38,'DN','從台灣出去');
+  s+=ln(100,217,160,217)+ln(270,217,480,217)+lb(375,210,'N9（跨國）','middle')+ln(590,217,660,217);
+  s+=lb(375,250,'控制：V-SMF ↔ H-SMF 用 N16','middle','var(--muted)');
+  return s+'</svg>';
+ },
+ ifs(){
+  const r=[['N1','UE ↔ AMF','NAS 信令'],['N2','(R)AN ↔ AMF','基地台的控制'],['N3','(R)AN ↔ UPF','使用者資料'],['N4','SMF ↔ UPF','PFCP，SMF 指揮 UPF'],['N6','UPF ↔ DN','出去上網'],['N9','UPF ↔ UPF','UPF 互傳'],['N8','UDM ↔ AMF',''],['N10','UDM ↔ SMF',''],['N11','AMF ↔ SMF',''],['N12','AMF ↔ AUSF',''],['N13','UDM ↔ AUSF',''],['N7','SMF ↔ PCF',''],['N15','PCF ↔ AMF',''],['N5','PCF ↔ AF',''],['N14','AMF ↔ AMF',''],['N16','SMF ↔ SMF','漫遊時 V-SMF ↔ H-SMF'],['N22','AMF ↔ NSSF',''],['N24','vPCF ↔ hPCF','漫遊'],['N27','vNRF ↔ hNRF','漫遊'],['N31','vNSSF ↔ hNSSF','漫遊'],['N32','SEPP ↔ SEPP','兩家電信之間'],['N35 / 36 / 37','UDM / PCF / NEF ↔ UDR','']];
+  return '<table class="opt-t"><thead><tr><th>介面</th><th>兩端</th><th>備註</th></tr></thead><tbody>'+r.map(x=>'<tr><td>'+x[0]+'</td><td>'+x[1]+'</td><td>'+x[2]+'</td></tr>').join('')+'</tbody></table>';
+ }
+};
+document.querySelectorAll('[data-fig]').forEach(e=>e.innerHTML=FIG[e.dataset.fig]());
+
+/* ---------- list ---------- */
+const SMC=[
+ ['f','1','Which one related to 1G wireless Networks is incorrect?','m_f1'],
+ ['f','2','Which one related to 2G wireless Networks is incorrect?','m_f2'],
+ ['f','3','Which one related to 3G wireless Networks is incorrect?','m_f3'],
+ ['f','4','Which one in Release 99 is incorrect?','m_f4'],
+ ['f','5','Which one in Release 4~8 is incorrect?','m_f5'],
+ ['f','6','Which one in 3GPP Architecture Release 8 is incorrect?','m_f6'],
+ ['f','7','Which one related to 4G EPS is incorrect?','m_f7'],
+ ['f','8','In terms of analog/digital and circuit/packet switching technologies, which one in 1-4G wireless Networks is incorrect?','m_f8'],
+ ['f','9','Which one in Release 8~14 is incorrect?','m_f9'],
+ ['f','10','Which one in Release 15-18 is incorrect?','m_f10'],
+ ['f','11','Which description related 5G AMF is incorrect?','m_f11'],
+ ['f','12','Which description related 5G SMF is incorrect?','m_f12'],
+ ['f','13','Which description related 5G NRF is incorrect?','m_f13'],
+ ['f','13','What is the entity to support Non-3GPP Access in 5G?','m_f14'],
+ ['f','14','Which one is not supported in Release 16? (P.110)','m_f15'],
+ ['f','15','Which one is not supported in Release 16? (P.111)','m_f16'],
+ ['a1','1','Which one related to 5G standard release is incorrect?','m_a1_1'],
+ ['a1','2','Which one is not features of 5G System Architecture?','m_a1_2'],
+ ['a1','3','Which is incorrect about the characteristics of NTN as compared with TN?','m_a1_3'],
+ ['a2','1','Which one related to 5G support of non-3GPP access is incorrect?','m_a2_1'],
+ ['a3','1','Which one related to AMF Load Balancing is incorrect?','m_a3_1'],
+ ['a3','2','Which one related to AMF Control of Overload is incorrect?','m_a3_2'],
+ ['a3','3','SMF instructs its corresponding UP function and which control parameters are NOT used?','m_a3_3'],
+ ['a3','4','Which Traffic Detection Information is not included in SMF control message?','m_a3_4'],
+ ['a3','5','Which behaviour is not included for SMF buffering instructions at UPF?','m_a3_5']
+];
+let listHide=false,listUnit='all';
+function renderList(){
+  const box=$('#listBox');
+  $('#listChips').innerHTML=[['all','全部']].concat(UNITS.map(u=>[u.id,u.short])).map(([id,n])=>'<button type="button" class="chip" data-u="'+id+'" aria-pressed="'+(listUnit===id)+'">'+esc(n)+'</button>').join('')
+    +'<button type="button" class="chip sep" id="lhide" aria-pressed="'+listHide+'">'+(listHide?'答案已遮住（點一題打開）':'遮住答案自我測驗')+'</button>';
+  $('#listChips').querySelectorAll('[data-u]').forEach(b=>b.onclick=()=>{listUnit=b.dataset.u;renderList();});
+  $('#lhide').onclick=()=>{listHide=!listHide;renderList();};
+  box.classList.toggle('hide',listHide);
+  let h='';
+  UNITS.filter(u=>listUnit==='all'||u.id===listUnit).forEach(u=>{
+    const cs=CARDS.filter(c=>c.u===u.id),ms=SMC.filter(x=>x[0]===u.id);
+    h+='<h2 class="lsec">'+esc(u.name)+'</h2>'+(u.note?'<p class="hint" style="margin-top:0">'+esc(u.note)+'</p>':'');
+    if(cs.length){
+      h+='<div class="lsub">'+(u.id.startsWith('c')?'延伸問答（樣卷沒有）':'簡答題')+'</div>';
+      cs.forEach((c,i)=>{const used=new Set();
+        h+='<div class="li"><div><div class="qq"><span class="n">'+(i+1)+'.</span>'+esc(c.q)+'</div>'+(c.zh?'<div class="qz">'+esc(c.zh)+'</div>':'')+(c.p?'<div class="pg">講義 '+esc(c.p)+'</div>':'')+'</div>'
+          +'<div class="ans"><div class="k">'+link(c.key,used)+'</div><ul>'+c.pts.map(p=>'<li>'+link(p,used)+'</li>').join('')+'</ul>'+(c.chk?'<div class="w">待對照講義 '+esc(c.p)+'</div>':'')+(c.dia?'<button type="button" class="chip" data-fig="'+c.dia+'" style="margin-top:6px">看圖解</button>':'')+'</div></div>';
+      });
+    }
+    if(ms.length){
+      h+='<div class="lsub">選擇題（選項為自編練習，樣卷只給題目）</div>';
+      ms.forEach(x=>{const m=MCQ.find(q=>q.id===x[3]),used=new Set();
+        h+='<div class="li"><div><div class="qq"><span class="n">'+x[1]+'.</span>'+esc(x[2])+'</div><div class="qz">'+esc(m.q)+'</div><div class="pg">講義 '+esc(m.p)+'</div></div>'
+          +'<div class="ans"><div class="k">答案：'+link(m.o[m.a],used)+'</div><ul class="ol">'+m.o.map((o,i)=>'<li'+(i===m.a?' class="r"':'')+'>'+esc(o)+'</li>').join('')+'</ul><div style="margin-top:6px">'+link(m.w,used)+'</div></div></div>';
+      });
+    }
+  });
+  box.innerHTML=h;
+  box.querySelectorAll('.li').forEach(el=>el.onclick=e=>{if(listHide&&!e.target.closest('.t'))el.classList.toggle('open');});
+  box.querySelectorAll('[data-fig]').forEach(b=>b.onclick=e=>{e.stopPropagation();go('figs');});
+}
+
+/* ---------- init ---------- */
+renderTerms('');
+renderHome();
+})();
+
+</script>
+</body>
+</html>
